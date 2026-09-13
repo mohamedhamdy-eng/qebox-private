@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../account/models/customer.dart';
 import '../../account/providers/customer_provider.dart';
-import '../../account/screens/customer_details_screen.dart';
+import '../../account/screens/account_screen.dart';
 
 import '../../addresses/models/address.dart';
 import '../../addresses/providers/address_provider.dart';
@@ -1124,7 +1124,9 @@ class _CheckoutScreenState
           await Navigator.of(context).push<bool>(
         MaterialPageRoute(
           builder: (context) {
-            return const CustomerDetailsScreen();
+            return const AccountScreen(
+              closeAfterAuthentication: true,
+            );
           },
         ),
       );

@@ -194,6 +194,19 @@ class OrderConfirmedScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     _InfoRow(
+                      icon: Icons.person_outline_rounded,
+                      title: 'Customer',
+                      value: _customerText(order),
+                    ),
+
+                    const Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 16,
+                      ),
+                      child: Divider(height: 1),
+                    ),
+
+                    _InfoRow(
                       icon: Icons.location_on_outlined,
                       title: 'Delivery address',
                       value:
@@ -347,6 +360,34 @@ class OrderConfirmedScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // ===========================================
+  // CUSTOMER TEXT
+  // ===========================================
+
+  static String _customerText(
+    CustomerOrder order,
+  ) {
+    final lines = <String>[];
+
+    if (order.customerName.trim().isNotEmpty) {
+      lines.add(order.customerName.trim());
+    }
+
+    if (order.customerPhone.trim().isNotEmpty) {
+      lines.add(order.customerPhone.trim());
+    }
+
+    if (order.customerId.trim().isNotEmpty) {
+      lines.add('ID: ${order.customerId.trim()}');
+    }
+
+    if (lines.isEmpty) {
+      return 'Customer information not available';
+    }
+
+    return lines.join('\n');
   }
 
   // ===========================================

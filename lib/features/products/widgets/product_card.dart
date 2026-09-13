@@ -7,6 +7,8 @@ class ProductCard extends StatelessWidget {
 
   final int quantity;
 
+  final bool isFavorite;
+
   final VoidCallback? onAddToCart;
   final VoidCallback? onIncrease;
   final VoidCallback? onDecrease;
@@ -18,6 +20,7 @@ class ProductCard extends StatelessWidget {
     super.key,
     required this.product,
     this.quantity = 0,
+    this.isFavorite = false,
     this.onAddToCart,
     this.onIncrease,
     this.onDecrease,
@@ -112,9 +115,14 @@ class ProductCard extends StatelessWidget {
                         color: Colors.white,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
-                        Icons.favorite_border_rounded,
+                      child: Icon(
+                        isFavorite
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
                         size: 18,
+                        color: isFavorite
+                            ? const Color(0xFFEE7424)
+                            : const Color(0xFF171717),
                       ),
                     ),
                   ),

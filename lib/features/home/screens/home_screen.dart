@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../account/providers/customer_provider.dart';
+import '../../account/screens/account_screen.dart';
 import '../../addresses/providers/address_provider.dart';
 import '../../addresses/screens/address_selection_screen.dart';
 import '../../cart/models/cart_item.dart';
 import '../../cart/providers/cart_provider.dart';
 import '../../cart/screens/cart_screen.dart';
+import '../../favorites/providers/favorites_provider.dart';
 import '../../orders/screens/orders_screen.dart';
 import '../../products/models/product.dart';
 import '../../products/widgets/product_card.dart';
@@ -130,6 +133,82 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         builder: (context) {
           return const AddressSelectionScreen();
         },
+      ),
+    );
+  }
+
+  void _openAccount() {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+    setState(() {
+      _selectedIndex = 4;
+    });
+  }
+
+  // =====================================================
+  // FAVORITES
+  // =====================================================
+
+  Future<void> _handleFavoriteTap(
+    Product product,
+  ) async {
+    var customer =
+        ref.read(customerProvider).customer;
+
+    // Guest -> Sign In / Sign Up first.
+    if (customer == null) {
+      final authenticated =
+          await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (context) {
+            return const AccountScreen(
+              closeAfterAuthentication: true,
+            );
+          },
+        ),
+      );
+
+      if (!mounted || authenticated != true) {
+        return;
+      }
+
+      customer =
+          ref.read(customerProvider).customer;
+    }
+
+    if (customer == null) {
+      return;
+    }
+
+    final wasFavorite =
+        ref.read(favoritesProvider).isFavorite(
+      customerId: customer.id,
+      productId: product.id,
+    );
+
+    ref
+        .read(favoritesProvider.notifier)
+        .toggleFavorite(
+          customerId: customer.id,
+          product: product,
+        );
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context)
+        .hideCurrentSnackBar();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          wasFavorite
+              ? '${product.name} removed from favorites'
+              : '${product.name} added to favorites',
+        ),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
@@ -263,7 +342,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ? const CartScreen()
                 : _selectedIndex == 3
                     ? const OrdersScreen()
-                    : _buildPlaceholder(),
+                    : _selectedIndex == 4
+                        ? const AccountScreen()
+                        : _buildPlaceholder(),
       ),
       bottomNavigationBar: _buildBottomNavigation(),
     );
@@ -278,8 +359,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final addressState = ref.watch(addressProvider);
 
+    final customerState =
+        ref.watch(customerProvider);
+
+    final favoritesState =
+        ref.watch(favoritesProvider);
+
     final selectedAddress =
         addressState.selectedAddress;
+
+    bool isFavorite(
+      Product product,
+    ) {
+      final customer =
+          customerState.customer;
+
+      if (customer == null) {
+        return false;
+      }
+
+      return favoritesState.isFavorite(
+        customerId: customer.id,
+        productId: product.id,
+      );
+    }
 
     return SingleChildScrollView(
       child: Padding(
@@ -306,16 +409,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
 
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.person_outline,
-                    color: Color(0xFF171717),
+                InkWell(
+                  onTap: _openAccount,
+                  borderRadius: BorderRadius.circular(22),
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.person_outline,
+                      color: Color(0xFF171717),
+                    ),
                   ),
                 ),
               ],
@@ -634,13 +741,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: ProductCard(
                         product: product,
                         quantity: quantity,
+                        isFavorite:
+                            isFavorite(product),
 
                         onTap: () {
                           // Product Details later
                         },
 
                         onFavoriteTap: () {
-                          // Favorites later
+                          _handleFavoriteTap(
+                            product,
+                          );
                         },
 
                         onAddToCart: () {
@@ -704,13 +815,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: ProductCard(
                         product: product,
                         quantity: quantity,
+                        isFavorite:
+                            isFavorite(product),
 
                         onTap: () {
                           // Product Details later
                         },
 
                         onFavoriteTap: () {
-                          // Favorites later
+                          _handleFavoriteTap(
+                            product,
+                          );
                         },
 
                         onAddToCart: () {
@@ -774,6 +889,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       badge:
                           _recommendedBadges[index],
                       quantity: quantity,
+                      isFavorite:
+                          isFavorite(product),
+
+                      onFavoriteTap: () {
+                        _handleFavoriteTap(
+                          product,
+                        );
+                      },
 
                       onAdd: () {
                         _addProductToCart(product);
@@ -1010,7 +1133,9 @@ class _RecommendedCard
   final Product product;
   final String badge;
   final int quantity;
+  final bool isFavorite;
 
+  final VoidCallback onFavoriteTap;
   final VoidCallback onAdd;
   final VoidCallback onIncrease;
   final VoidCallback onDecrease;
@@ -1019,6 +1144,8 @@ class _RecommendedCard
     required this.product,
     required this.badge,
     required this.quantity,
+    required this.isFavorite,
+    required this.onFavoriteTap,
     required this.onAdd,
     required this.onIncrease,
     required this.onDecrease,
@@ -1037,22 +1164,55 @@ class _RecommendedCard
       ),
       child: Row(
         children: [
-          Container(
-            width: 85,
-            height: 85,
-            decoration:
-                BoxDecoration(
-              color:
-                  const Color(0xFFF3F1ED),
-              borderRadius:
-                  BorderRadius.circular(18),
-            ),
-            child: const Icon(
-              Icons.shopping_bag_outlined,
-              size: 38,
-              color:
-                  Color(0xFFEE7424),
-            ),
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 85,
+                height: 85,
+                decoration:
+                    BoxDecoration(
+                  color:
+                      const Color(0xFFF3F1ED),
+                  borderRadius:
+                      BorderRadius.circular(18),
+                ),
+                child: const Icon(
+                  Icons.shopping_bag_outlined,
+                  size: 38,
+                  color:
+                      Color(0xFFEE7424),
+                ),
+              ),
+
+              Positioned(
+                top: 6,
+                right: 6,
+                child: InkWell(
+                  onTap: onFavoriteTap,
+                  borderRadius:
+                      BorderRadius.circular(20),
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    decoration:
+                        const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      isFavorite
+                          ? Icons.favorite_rounded
+                          : Icons.favorite_border_rounded,
+                      size: 18,
+                      color: isFavorite
+                          ? const Color(0xFFEE7424)
+                          : const Color(0xFF171717),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
 
           const SizedBox(width: 14),

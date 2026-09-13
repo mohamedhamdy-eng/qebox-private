@@ -252,6 +252,73 @@ class OrderDetailsScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // =====================================================
+            // CUSTOMER DETAILS
+            // =====================================================
+
+            const Text(
+              'Customer details',
+              style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF171717),
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: Column(
+                children: [
+                  _InfoRow(
+                    icon: Icons.person_outline_rounded,
+                    title: 'Full name',
+                    value: order.customerName.trim().isEmpty
+                        ? 'Not available'
+                        : order.customerName,
+                  ),
+
+                  const Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 16,
+                    ),
+                    child: Divider(height: 1),
+                  ),
+
+                  _InfoRow(
+                    icon: Icons.phone_outlined,
+                    title: 'Mobile number',
+                    value: order.customerPhone.trim().isEmpty
+                        ? 'Not available'
+                        : order.customerPhone,
+                  ),
+
+                  const Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 16,
+                    ),
+                    child: Divider(height: 1),
+                  ),
+
+                  _InfoRow(
+                    icon: Icons.badge_outlined,
+                    title: 'Customer ID',
+                    value: order.customerId.trim().isEmpty
+                        ? 'Not available'
+                        : order.customerId,
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // =====================================================
             // DELIVERY
             // =====================================================
 
