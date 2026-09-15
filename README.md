@@ -1,5 +1,18 @@
 # qebox_private
 
+## Q Bot AI setup
+
+Q Bot works with local support answers when no AI key is configured. For Gemini
+development testing, create an API key in Google AI Studio and run:
+
+```powershell
+flutter run --dart-define=GEMINI_API_KEY=YOUR_KEY
+```
+
+Do not commit the key. `--dart-define` is suitable for local testing, but a
+production app must call Gemini through a secured backend so the key cannot be
+extracted from the application package.
+
 A new Flutter project.
 
 ## Getting Started

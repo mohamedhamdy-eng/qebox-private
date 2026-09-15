@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "711543335489",
+    "project_id": "qeboxprivate",
+    "storage_bucket": "qeboxprivate.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:711543335489:android:7a95e8bfc71390b1d4b4c0",
+        "android_client_info": {
+          "package_name": "com.qebox.qebox_private"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKvBPdP-hPo7oATsjtqHg_emfLXHQhxbU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

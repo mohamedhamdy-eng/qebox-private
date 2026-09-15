@@ -51,33 +51,32 @@ class ProductCard extends StatelessWidget {
                     color: const Color(0xFFF3F1ED),
                     borderRadius: BorderRadius.circular(18),
                   ),
-                  child: product.imageUrl != null &&
-                          product.imageUrl!.isNotEmpty
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(18),
-                          child: Image.network(
-                            product.imageUrl!,
-                            fit: BoxFit.cover,
-                            errorBuilder: (
-                              context,
-                              error,
-                              stackTrace,
-                            ) {
-                              return const Icon(
-                                Icons.shopping_bag_outlined,
-                                size: 48,
-                                color: Color(0xFFEE7424),
-                              );
-                            },
-                          ),
-                        )
-                      : const Icon(
-                          Icons.shopping_bag_outlined,
-                          size: 48,
-                          color: Color(0xFFEE7424),
-                        ),
+                  child:
+                      product.imageUrl != null && product.imageUrl!.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(18),
+                              child: Image.network(
+                                product.imageUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (
+                                  context,
+                                  error,
+                                  stackTrace,
+                                ) {
+                                  return const Icon(
+                                    Icons.shopping_bag_outlined,
+                                    size: 48,
+                                    color: Color(0xFFEE7424),
+                                  );
+                                },
+                              ),
+                            )
+                          : const Icon(
+                              Icons.shopping_bag_outlined,
+                              size: 48,
+                              color: Color(0xFFEE7424),
+                            ),
                 ),
-
                 if (product.isNew)
                   Positioned(
                     top: 8,
@@ -101,7 +100,6 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
                   ),
-
                 Positioned(
                   top: 8,
                   right: 8,
@@ -129,9 +127,7 @@ class ProductCard extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 12),
-
             Text(
               product.name,
               maxLines: 1,
@@ -142,9 +138,7 @@ class ProductCard extends StatelessWidget {
                 color: Color(0xFF171717),
               ),
             ),
-
             const SizedBox(height: 8),
-
             Row(
               children: [
                 Text(
@@ -155,7 +149,6 @@ class ProductCard extends StatelessWidget {
                     color: Color(0xFFEE7424),
                   ),
                 ),
-
                 if (product.hasDiscount) ...[
                   const SizedBox(width: 6),
                   Text(
@@ -169,9 +162,7 @@ class ProductCard extends StatelessWidget {
                 ],
               ],
             ),
-
             const SizedBox(height: 12),
-
             if (!product.inStock)
               _buildOutOfStockButton()
             else if (quantity == 0)
@@ -234,7 +225,6 @@ class ProductCard extends StatelessWidget {
               ),
             ),
           ),
-
           Text(
             quantity.toString(),
             style: const TextStyle(
@@ -243,7 +233,6 @@ class ProductCard extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
-
           InkWell(
             onTap: onIncrease,
             borderRadius: BorderRadius.circular(20),

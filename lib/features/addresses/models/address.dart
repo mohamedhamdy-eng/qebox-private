@@ -40,4 +40,30 @@ class Address {
       isDefault: isDefault ?? this.isDefault,
     );
   }
+
+  factory Address.fromJson(Map<String, dynamic> json) {
+    return Address(
+      id: json['id']?.toString() ?? '',
+      label: json['label']?.toString() ?? '',
+      addressLine: json['address_line']?.toString() ?? '',
+      building: json['building']?.toString(),
+      floor: json['floor']?.toString(),
+      apartment: json['apartment']?.toString(),
+      landmark: json['landmark']?.toString(),
+      isDefault: json['is_default'] as bool? ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'label': label,
+      'address_line': addressLine,
+      'building': building,
+      'floor': floor,
+      'apartment': apartment,
+      'landmark': landmark,
+      'is_default': isDefault,
+    };
+  }
 }
