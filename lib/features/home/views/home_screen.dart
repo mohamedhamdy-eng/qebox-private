@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/qebox_theme.dart';
 import '../../account/viewmodels/customer_view_model.dart';
 import '../../account/views/account_screen.dart';
 import '../../addresses/viewmodels/address_view_model.dart';
@@ -399,18 +400,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           const Text(
                             'Delivering to',
                             style: TextStyle(
-                              fontSize: 11,
-                              color: Color(0xFF777777),
-                            ),
+                                fontSize: 11, color: Color(0xFF777777)),
                           ),
                           const SizedBox(height: 3),
                           Text(
                             selectedAddress?.label ?? 'Choose address',
                             style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF171717),
-                            ),
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF171717)),
                           ),
                           const SizedBox(height: 3),
                           Text(
@@ -419,9 +417,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                              fontSize: 11,
-                              color: Color(0xFF777777),
-                            ),
+                                fontSize: 11, color: Color(0xFF777777)),
                           ),
                         ],
                       ),
@@ -478,16 +474,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 isFavorite,
               ),
             ] else ...[
-              // =====================================================
-              // CATEGORIES
-              // =====================================================
-
-              const SectionTitle(
-                title: 'Shop by category',
-              ),
-
+              const SectionTitle(title: 'Shop by category'),
               const SizedBox(height: 18),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -513,25 +501,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 34),
 
               // =====================================================
               // DEALS
               // =====================================================
 
-              const SectionTitle(
-                title: 'Deals for you',
-              ),
-
+              const SectionTitle(title: 'Deals for you'),
               const SizedBox(height: 16),
 
               Container(
                 width: double.infinity,
                 height: 190,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFE6D5),
-                  borderRadius: BorderRadius.circular(28),
+                  color: QeboxPalette.green,
+                  borderRadius: BorderRadius.circular(24),
                 ),
                 child: Stack(
                   children: [
@@ -556,9 +540,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(
-                                0xFFEE7424,
-                              ),
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(
                                 20,
                               ),
@@ -566,7 +548,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             child: const Text(
                               'SPECIAL OFFER',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: QeboxPalette.green,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -579,7 +561,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               fontSize: 25,
                               height: 1.05,
                               fontWeight: FontWeight.w800,
-                              color: Color(0xFF171717),
+                              color: Colors.white,
                             ),
                           ),
                           const SizedBox(height: 10),
@@ -588,7 +570,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFFEE7424),
+                              color: QeboxPalette.orange,
                             ),
                           ),
                         ],

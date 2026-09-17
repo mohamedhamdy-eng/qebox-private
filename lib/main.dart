@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'core/theme/qebox_theme.dart';
 import 'features/account/repositories/customer_repository.dart';
 import 'features/account/repositories/phone_auth_repository.dart';
 import 'features/account/viewmodels/customer_view_model.dart';
@@ -84,9 +85,7 @@ class QeboxPrivateApp extends ConsumerWidget {
       navigatorKey: rootNavigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'Qebox Private',
-      theme: ThemeData(
-        useMaterial3: true,
-      ),
+      theme: buildQeboxTheme(),
       builder: (context, child) => QBotLauncher(
         navigatorKey: rootNavigatorKey,
         child: child ?? const SizedBox.shrink(),

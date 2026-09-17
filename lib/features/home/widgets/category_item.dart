@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/qebox_theme.dart';
+
 class CategoryItem extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -24,13 +26,14 @@ class CategoryItem extends StatelessWidget {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                color: QeboxPalette.mint,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: Colors.white),
               ),
               child: Icon(
                 icon,
                 size: 28,
-                color: const Color(0xFFEE7424),
+                color: QeboxPalette.green,
               ),
             ),
             const SizedBox(height: 9),

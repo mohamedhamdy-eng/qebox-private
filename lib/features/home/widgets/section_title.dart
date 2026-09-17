@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/qebox_theme.dart';
+
 class SectionTitle extends StatelessWidget {
   final String title;
   final VoidCallback? onSeeAll;
@@ -19,8 +21,8 @@ class SectionTitle extends StatelessWidget {
           title,
           style: const TextStyle(
             fontSize: 21,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF171717),
+            fontWeight: FontWeight.w700,
+            color: QeboxPalette.ink,
           ),
         ),
         TextButton(
@@ -30,7 +32,7 @@ class SectionTitle extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Color(0xFFEE7424),
+              color: QeboxPalette.orange,
             ),
           ),
         ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/qebox_theme.dart';
 import '../models/product.dart';
 
 class ProductCard extends StatelessWidget {
@@ -37,7 +38,15 @@ class ProductCard extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: QeboxPalette.line),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0A003B32),
+              blurRadius: 18,
+              offset: Offset(0, 8),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,7 +57,7 @@ class ProductCard extends StatelessWidget {
                   height: 110,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF3F1ED),
+                    color: QeboxPalette.background,
                     borderRadius: BorderRadius.circular(18),
                   ),
                   child:
@@ -182,7 +191,7 @@ class ProductCard extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onAddToCart,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF171717),
+          backgroundColor: QeboxPalette.deepGreen,
           foregroundColor: Colors.white,
           elevation: 0,
           padding: EdgeInsets.zero,
@@ -206,7 +215,7 @@ class ProductCard extends StatelessWidget {
       width: double.infinity,
       height: 36,
       decoration: BoxDecoration(
-        color: const Color(0xFF171717),
+        color: QeboxPalette.deepGreen,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
