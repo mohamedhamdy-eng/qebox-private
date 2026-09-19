@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/theme/qebox_theme.dart';
+import 'firebase_options.dart';
 import 'features/account/repositories/customer_repository.dart';
 import 'features/account/repositories/phone_auth_repository.dart';
 import 'features/account/viewmodels/customer_view_model.dart';
@@ -25,7 +26,9 @@ final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   final preferences = await SharedPreferences.getInstance();
 
   runApp(
