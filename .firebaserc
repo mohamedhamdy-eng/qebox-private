@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "qeboxprivate"
+    "default": "qeboxprivate",
+    "dev": "qeboxprivate-dev"
   }
 }

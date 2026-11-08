@@ -1,4 +1,14 @@
 {
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": ["node_modules", "test"]
+    }
+  ],
   "hosting": {
     "public": "build/web",
     "ignore": [

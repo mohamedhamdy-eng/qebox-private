@@ -1,29 +1,59 @@
-# qebox_private
+# Qebox
 
-## Q Bot AI setup
+Qebox is a grocery delivery app. The client is Flutter. The backend is
+Firebase (phone login, Firestore, and Cloud Functions).
 
-Q Bot works with local support answers when no AI key is configured. For Gemini
-development testing, create an API key in Google AI Studio and run:
+## Environments
+
+Debug and profile builds use the `qeboxprivate-dev` Firebase project. Release
+builds use the `qeboxprivate` production project. To override the default, use
+`--dart-define=APP_ENV=development` or `--dart-define=APP_ENV=production`.
+
+## Deploy the backend
+
+The app needs the Cloud Functions to place orders. The Firebase project must
+use the Blaze plan.
+
+Before you deploy the rules, add an `admins/{uid}` document with `active: true`
+for each staff account. The rules block staff writes without this document.
 
 ```powershell
-flutter run --dart-define=GEMINI_API_KEY=YOUR_KEY
+cd functions
+npm install
+cd ..
+firebase use dev
+firebase functions:secrets:set GEMINI_API_KEY
+firebase deploy --only functions,firestore:rules
 ```
 
-Do not commit the key. `--dart-define` is suitable for local testing, but a
-production app must call Gemini through a secured backend so the key cannot be
-extracted from the application package.
+Do the same with `firebase use default` for production. Create the Gemini key
+in Google AI Studio. Do not commit the key.
 
-A new Flutter project.
+## Coupon fields
 
-## Getting Started
+Coupons in the `coupons` collection accept these fields: `code` (uppercase),
+`type` (`percentage` or `fixed`), `value`, `minimumOrder`, `active`, `startsAt`,
+`endsAt`, `usageLimit`, `usedCount`, and `perCustomerLimit`. Only `code`,
+`type`, `value`, and `active` are required.
 
-This project is a starting point for a Flutter application.
+## Android release signing
 
-A few resources to get you started if this is your first Flutter project:
+Create `android/key.properties`. Do not commit this file.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+```properties
+storeFile=C:/path/to/release.jks
+storePassword=...
+keyAlias=...
+keyPassword=...
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Tests
+
+```powershell
+flutter test
+cd functions
+npm test
+npm run test:emulator
+```
+
+The emulator tests need Java and the Firebase CLI.

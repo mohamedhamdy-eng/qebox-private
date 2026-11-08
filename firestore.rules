@@ -1,0 +1,70 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isStaff() {
+      return signedIn()
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true;
+    }
+
+    function publicRead() {
+      return resource.data.active == true || isStaff();
+    }
+
+    match /products/{id} {
+      allow read: if publicRead();
+      allow write: if isStaff();
+    }
+
+    match /categories/{id} {
+      allow read: if publicRead();
+      allow write: if isStaff();
+    }
+
+    match /banners/{id} {
+      allow read: if publicRead();
+      allow write: if isStaff();
+    }
+
+    match /bundles/{id} {
+      allow read: if publicRead();
+      allow write: if isStaff();
+    }
+
+    // Customers use the previewCoupon function. They cannot list codes.
+    match /coupons/{id} {
+      allow read, write: if isStaff();
+    }
+
+    // Only the placeOrder and cancelOrder functions create or cancel orders.
+    match /orders/{id} {
+      allow read: if isStaff() || isOwner(resource.data.customerId);
+      allow update: if isStaff();
+    }
+
+    match /customers/{uid} {
+      allow read: if isOwner(uid) || isStaff();
+      allow create, update: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(
+          ['name', 'phone', 'selectedAddressId', 'favorites', 'updatedAt']);
+
+      match /addresses/{addressId} {
+        allow read: if isOwner(uid) || isStaff();
+        allow write: if isOwner(uid);
+      }
+    }
+
+    // Set staff accounts from the Firebase console or the Admin SDK.
+    match /admins/{uid} {
+      allow read: if isOwner(uid);
+    }
+  }
+}
