@@ -6,8 +6,8 @@ import '../../account/views/account_screen.dart';
 import '../../cart/models/cart_item.dart';
 import '../../cart/viewmodels/cart_view_model.dart';
 import '../../favorites/viewmodels/favorites_view_model.dart';
-import '../data/product_catalog.dart';
 import '../models/product.dart';
+import '../viewmodels/catalog_view_model.dart';
 import '../widgets/product_card.dart';
 import 'product_details_screen.dart';
 
@@ -24,25 +24,15 @@ class CategoriesScreen extends ConsumerStatefulWidget {
 class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   late String? _selectedCategory = widget.initialCategory;
 
-  static const _categories = <String, String>{
-    'dairy': 'Dairy',
-    'snacks': 'Snacks',
-    'home-care': 'Home care',
-    'desserts': 'Desserts',
-    'bakery': 'Bakery',
-    'beverages': 'Beverages',
-    'fresh-food': 'Fresh food',
-    'pantry': 'Pantry',
-  };
-
   @override
   Widget build(BuildContext context) {
     final cart = ref.watch(cartProvider);
     final customer = ref.watch(customerProvider).customer;
     final favorites = ref.watch(favoritesProvider);
+    final catalog = ref.watch(catalogProvider);
     final products = _selectedCategory == null
-        ? ProductCatalog.allProducts
-        : ProductCatalog.allProducts
+        ? catalog.products
+        : catalog.products
             .where((item) => item.categoryId == _selectedCategory)
             .toList();
 
@@ -64,45 +54,54 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               scrollDirection: Axis.horizontal,
               children: [
                 _chip(null, 'All'),
-                ..._categories.entries
-                    .map((entry) => _chip(entry.key, entry.value)),
+                ...catalog.categories
+                    .map((category) => _chip(category.id, category.name)),
               ],
             ),
           ),
           Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(20),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: .64,
-                crossAxisSpacing: 14,
-                mainAxisSpacing: 14,
-              ),
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                final product = products[index];
-                final quantity = _quantity(product, cart);
-                return ProductCard(
-                  product: product,
-                  quantity: quantity,
-                  isFavorite: customer != null &&
-                      favorites.isFavorite(
-                        customerId: customer.id,
-                        productId: product.id,
-                      ),
-                  onTap: () => _openDetails(product),
-                  onFavoriteTap: () => _toggleFavorite(product),
-                  onAddToCart: () =>
-                      ref.read(cartProvider.notifier).addProduct(product),
-                  onIncrease: () => ref
-                      .read(cartProvider.notifier)
-                      .increaseQuantity(product.id),
-                  onDecrease: () => ref
-                      .read(cartProvider.notifier)
-                      .decreaseQuantity(product.id),
-                );
-              },
-            ),
+            child: catalog.loading
+                ? const Center(child: CircularProgressIndicator())
+                : products.isEmpty
+                    ? const Center(child: Text('No products available yet.'))
+                    : LayoutBuilder(builder: (context, constraints) {
+                        final compact = constraints.maxWidth < 380;
+                        return GridView.builder(
+                          padding: EdgeInsets.all(compact ? 12 : 20),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: compact ? .45 : .55,
+                            crossAxisSpacing: compact ? 10 : 14,
+                            mainAxisSpacing: compact ? 10 : 14,
+                          ),
+                          itemCount: products.length,
+                          itemBuilder: (context, index) {
+                            final product = products[index];
+                            final quantity = _quantity(product, cart);
+                            return ProductCard(
+                              product: product,
+                              quantity: quantity,
+                              isFavorite: customer != null &&
+                                  favorites.isFavorite(
+                                    customerId: customer.id,
+                                    productId: product.id,
+                                  ),
+                              onTap: () => _openDetails(product),
+                              onFavoriteTap: () => _toggleFavorite(product),
+                              onAddToCart: () => ref
+                                  .read(cartProvider.notifier)
+                                  .addProduct(product),
+                              onIncrease: () => ref
+                                  .read(cartProvider.notifier)
+                                  .increaseQuantity(product.id),
+                              onDecrease: () => ref
+                                  .read(cartProvider.notifier)
+                                  .decreaseQuantity(product.id),
+                            );
+                          },
+                        );
+                      }),
           ),
         ],
       ),

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/qebox_theme.dart';
@@ -34,7 +35,6 @@ class ProductCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 155,
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -60,31 +60,26 @@ class ProductCard extends StatelessWidget {
                     color: QeboxPalette.background,
                     borderRadius: BorderRadius.circular(18),
                   ),
-                  child:
-                      product.imageUrl != null && product.imageUrl!.isNotEmpty
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(18),
-                              child: Image.network(
-                                product.imageUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (
-                                  context,
-                                  error,
-                                  stackTrace,
-                                ) {
-                                  return const Icon(
-                                    Icons.shopping_bag_outlined,
-                                    size: 48,
-                                    color: Color(0xFFEE7424),
-                                  );
-                                },
-                              ),
-                            )
-                          : const Icon(
-                              Icons.shopping_bag_outlined,
-                              size: 48,
-                              color: Color(0xFFEE7424),
-                            ),
+                  child: product.imageUrl != null &&
+                          product.imageUrl!.isNotEmpty
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(18),
+                          child: product.imageUrl!.startsWith('data:image/')
+                              ? Image.memory(
+                                  base64Decode(
+                                      product.imageUrl!.split(',').last),
+                                  fit: BoxFit.cover)
+                              : Image.network(product.imageUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(Icons.shopping_bag_outlined,
+                                          size: 48, color: Color(0xFFEE7424))),
+                        )
+                      : const Icon(
+                          Icons.shopping_bag_outlined,
+                          size: 48,
+                          color: Color(0xFFEE7424),
+                        ),
                 ),
                 if (product.isNew)
                   Positioned(

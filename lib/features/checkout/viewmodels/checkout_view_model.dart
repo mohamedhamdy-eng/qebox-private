@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../repositories/coupon_repository.dart';
+
 enum PaymentMethod {
   cash,
   card,
@@ -53,10 +55,12 @@ class CheckoutState {
 }
 
 class CheckoutViewModel extends StateNotifier<CheckoutState> {
-  CheckoutViewModel()
+  CheckoutViewModel(this._coupons)
       : super(
           const CheckoutState(),
         );
+
+  final CouponRepository _coupons;
 
   void selectPaymentMethod(
     PaymentMethod method,
@@ -78,10 +82,10 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
     state = CheckoutState(paymentMethod: state.paymentMethod);
   }
 
-  void applyPromoCode({
+  Future<void> applyPromoCode({
     required String code,
     required double subtotal,
-  }) {
+  }) async {
     final normalizedCode = code.trim().toUpperCase();
 
     if (normalizedCode.isEmpty) {
@@ -94,48 +98,40 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
       return;
     }
 
-    // TEMPORARY DEMO PROMO LOGIC
-    // Later this will come from Backend / Dashboard.
-
-    if (normalizedCode == 'SAVE10') {
-      final discount = subtotal * 0.10;
-
-      state = state.copyWith(
-        promoCode: normalizedCode,
-        discountAmount: discount,
-        promoMessage: '10% discount applied',
-      );
-
-      return;
-    }
-
-    if (normalizedCode == 'QBOX20') {
-      final discount = subtotal >= 200 ? 20.0 : 0.0;
-
-      if (discount == 0) {
+    try {
+      final coupon = await _coupons.findByCode(normalizedCode);
+      if (coupon == null || !coupon.active) {
         state = state.copyWith(
-          promoCode: '',
-          discountAmount: 0,
-          promoMessage: 'Minimum order is EGP 200',
-        );
-
+            promoCode: '',
+            discountAmount: 0,
+            promoMessage: 'Invalid or inactive promo code');
         return;
       }
-
+      if (subtotal < coupon.minimumOrder) {
+        state = state.copyWith(
+            promoCode: '',
+            discountAmount: 0,
+            promoMessage:
+                'Minimum order is EGP ${coupon.minimumOrder.toStringAsFixed(0)}');
+        return;
+      }
+      final discount = coupon.type == 'percentage'
+          ? subtotal * coupon.value / 100
+          : coupon.value;
       state = state.copyWith(
-        promoCode: normalizedCode,
-        discountAmount: 20,
-        promoMessage: 'EGP 20 discount applied',
-      );
-
+          promoCode: coupon.code,
+          discountAmount: discount > subtotal ? subtotal : discount,
+          promoMessage: coupon.type == 'percentage'
+              ? '${coupon.value.toStringAsFixed(0)}% discount applied'
+              : 'EGP ${coupon.value.toStringAsFixed(0)} discount applied');
+      return;
+    } catch (_) {
+      state = state.copyWith(
+          promoCode: '',
+          discountAmount: 0,
+          promoMessage: 'Could not validate promo code. Try again.');
       return;
     }
-
-    state = state.copyWith(
-      promoCode: '',
-      discountAmount: 0,
-      promoMessage: 'Invalid promo code',
-    );
   }
 
   void removePromoCode() {
@@ -147,9 +143,11 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
   }
 }
 
+final couponRepositoryProvider = Provider<CouponRepository>((ref) {
+  throw UnimplementedError('CouponRepository must be provided at app startup.');
+});
+
 final checkoutProvider =
     StateNotifierProvider<CheckoutViewModel, CheckoutState>(
-  (ref) {
-    return CheckoutViewModel();
-  },
+  (ref) => CheckoutViewModel(ref.watch(couponRepositoryProvider)),
 );

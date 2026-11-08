@@ -38,13 +38,11 @@ class DeliveryScheduleState {
   });
 
   bool get isComplete {
-    return selectedDate != null &&
-        selectedTimeSlot != null;
+    return selectedDate != null && selectedTimeSlot != null;
   }
 
   DateTime? get deliveryStartDateTime {
-    if (selectedDate == null ||
-        selectedTimeSlot == null) {
+    if (selectedDate == null || selectedTimeSlot == null) {
       return null;
     }
 
@@ -57,8 +55,7 @@ class DeliveryScheduleState {
   }
 
   DateTime? get deliveryEndDateTime {
-    if (selectedDate == null ||
-        selectedTimeSlot == null) {
+    if (selectedDate == null || selectedTimeSlot == null) {
       return null;
     }
 
@@ -77,19 +74,14 @@ class DeliveryScheduleState {
     bool clearTimeSlot = false,
   }) {
     return DeliveryScheduleState(
-      selectedDate: clearDate
-          ? null
-          : selectedDate ?? this.selectedDate,
-      selectedTimeSlot: clearTimeSlot
-          ? null
-          : selectedTimeSlot ??
-              this.selectedTimeSlot,
+      selectedDate: clearDate ? null : selectedDate ?? this.selectedDate,
+      selectedTimeSlot:
+          clearTimeSlot ? null : selectedTimeSlot ?? this.selectedTimeSlot,
     );
   }
 }
 
-class DeliveryScheduleViewModel
-    extends StateNotifier<DeliveryScheduleState> {
+class DeliveryScheduleViewModel extends StateNotifier<DeliveryScheduleState> {
   DeliveryScheduleViewModel()
       : super(
           const DeliveryScheduleState(),
@@ -120,9 +112,7 @@ class DeliveryScheduleViewModel
 }
 
 final deliveryScheduleProvider =
-    StateNotifierProvider<
-        DeliveryScheduleViewModel,
-        DeliveryScheduleState>(
+    StateNotifierProvider<DeliveryScheduleViewModel, DeliveryScheduleState>(
   (ref) {
     return DeliveryScheduleViewModel();
   },

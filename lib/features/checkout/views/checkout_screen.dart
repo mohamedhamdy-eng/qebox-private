@@ -533,8 +533,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           height: 52,
                           child: ElevatedButton(
                             onPressed: checkoutState.promoCode.isEmpty
-                                ? () {
-                                    ref
+                                ? () async {
+                                    await ref
                                         .read(
                                           checkoutProvider.notifier,
                                         )

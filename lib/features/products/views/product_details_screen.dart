@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -57,11 +58,9 @@ class ProductDetailsScreen extends ConsumerWidget {
               child: product.imageUrl?.isNotEmpty == true
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(28),
-                      child: Image.network(
-                        product.imageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _placeholder(),
-                      ),
+                      child: product.imageUrl!.startsWith('data:image/')
+                          ? Image.memory(base64Decode(product.imageUrl!.split(',').last), fit: BoxFit.cover)
+                          : Image.network(product.imageUrl!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _placeholder()),
                     )
                   : _placeholder(),
             ),

@@ -90,6 +90,10 @@ class LocalQBotRepository implements ChatRepository {
     await Future<void>.delayed(const Duration(milliseconds: 450));
     final text = message.toLowerCase().trim();
 
+    if (RegExp('[\u0600-\u06ff]').hasMatch(text)) {
+      return 'أنا Q Bot. أقدر أساعدك في المنتجات، السلة، الأوردرات، التوصيل، الدفع، والكوبونات. اكتب اسم المنتج والكمية التي تريدها وسأجهز السلة.';
+    }
+
     if (_contains(text, ['order', 'track', 'delivery status'])) {
       return 'You can track an order from Account → My Orders. Open the order to see its current status and delivery details.';
     }

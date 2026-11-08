@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/order.dart';
@@ -6,10 +8,22 @@ import '../repositories/orders_repository.dart';
 class OrdersViewModel extends StateNotifier<List<CustomerOrder>> {
   OrdersViewModel(this._repository, String? customerId)
       : _customerId = customerId ?? '',
-        super(_repository.loadOrders(customerId ?? ''));
+        super(_repository.loadOrders(customerId ?? '')) {
+    _listenForRemoteOrders();
+  }
 
   final OrdersRepository _repository;
   String _customerId;
+  StreamSubscription<List<CustomerOrder>>? _remoteOrdersSubscription;
+
+  void _listenForRemoteOrders() {
+    _remoteOrdersSubscription?.cancel();
+    _remoteOrdersSubscription =
+        _repository.watchRemoteOrders().listen((orders) {
+      state = orders;
+      _repository.saveOrders(_customerId, orders);
+    });
+  }
 
   void _setOrders(List<CustomerOrder> orders) {
     state = orders;
@@ -21,6 +35,7 @@ class OrdersViewModel extends StateNotifier<List<CustomerOrder>> {
     if (_customerId == nextCustomerId) return;
     _customerId = nextCustomerId;
     state = _repository.loadOrders(_customerId);
+    _listenForRemoteOrders();
   }
 
   void createOrder(CustomerOrder order) {
@@ -29,6 +44,14 @@ class OrdersViewModel extends StateNotifier<List<CustomerOrder>> {
       order,
       ...state,
     ]);
+    unawaited(
+      _repository
+          .publishOrder(order)
+          .catchError((Object error, StackTrace stack) {
+        // The local order must remain available even when the remote service is
+        // temporarily unavailable. A later sync can publish it again.
+      }),
+    );
   }
 
   void updateOrderStatus(
@@ -72,6 +95,12 @@ class OrdersViewModel extends StateNotifier<List<CustomerOrder>> {
 
   void clearOrders() {
     _setOrders([]);
+  }
+
+  @override
+  void dispose() {
+    _remoteOrdersSubscription?.cancel();
+    super.dispose();
   }
 }
 

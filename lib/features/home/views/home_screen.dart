@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,8 +12,9 @@ import '../../cart/viewmodels/cart_view_model.dart';
 import '../../cart/views/cart_screen.dart';
 import '../../favorites/viewmodels/favorites_view_model.dart';
 import '../../orders/views/orders_screen.dart';
-import '../../products/data/product_catalog.dart';
 import '../../products/models/product.dart';
+import '../../products/models/bundle.dart';
+import '../../products/viewmodels/catalog_view_model.dart';
 import '../../products/views/categories_screen.dart';
 import '../../products/views/product_details_screen.dart';
 import '../../products/widgets/product_card.dart';
@@ -29,17 +31,19 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedIndex = 0;
+  final _bannerController = PageController();
+  int _activeBanner = 0;
+
+  @override
+  void dispose() {
+    _bannerController.dispose();
+    super.dispose();
+  }
 
   // =====================================================
   // TEMPORARY PRODUCT DATA
   // Later this will come from API / Backend / Dashboard
   // =====================================================
-
-  static const List<Product> _popularProducts = ProductCatalog.popularProducts;
-  static const List<Product> _newArrivalProducts =
-      ProductCatalog.newArrivalProducts;
-  static const List<Product> _recommendedProducts =
-      ProductCatalog.recommendedProducts;
 
   static const List<String> _recommendedBadges = [
     'TOP PICK',
@@ -75,6 +79,60 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         builder: (_) => CategoriesScreen(
           initialCategory: categoryId,
           showBackButton: true,
+        ),
+      ),
+    );
+  }
+
+  void _showBundleDetails(StoreBundle bundle, List<Product> products) {
+    final included = products
+        .where((product) => bundle.productIds.contains(product.id))
+        .toList();
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(bundle.name,
+                  style: const TextStyle(
+                      fontSize: 22, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 4),
+              Text(
+                  'EGP ${bundle.price.toStringAsFixed(2)} · ${bundle.productIds.length} products',
+                  style: const TextStyle(color: QeboxPalette.muted)),
+              const SizedBox(height: 16),
+              const Text('Included products',
+                  style: TextStyle(fontWeight: FontWeight.w700)),
+              const SizedBox(height: 6),
+              if (included.isEmpty)
+                const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Text('Product details are loading.')),
+              for (final product in included)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.shopping_bag_outlined),
+                  title: Text(product.name),
+                  trailing: Text('EGP ${product.price.toStringAsFixed(2)}'),
+                ),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: () {
+                  ref.read(cartProvider.notifier).addBundle(bundle);
+                  Navigator.pop(sheetContext);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('${bundle.name} added to cart')));
+                },
+                icon: const Icon(Icons.add_shopping_cart_outlined),
+                label: const Text('Add bundle to cart'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -255,6 +313,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  Widget _bannerArrow(IconData icon, VoidCallback onTap) => Material(
+        color: Colors.black.withOpacity(.35),
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(5),
+            child: Icon(icon, color: Colors.white),
+          ),
+        ),
+      );
+
   // =====================================================
   // BUILD
   // =====================================================
@@ -283,6 +354,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // =====================================================
 
   Widget _buildHome() {
+    final catalog = ref.watch(catalogProvider);
+    final allProducts = catalog.products;
+    final banners = catalog.banners;
+    final popularProducts =
+        allProducts.where((product) => product.isFeatured).toList();
+    final newArrivalProducts =
+        allProducts.where((product) => product.isNew).toList();
+    final recommendedProducts = allProducts
+        .where((product) => !product.isNew && !product.isFeatured)
+        .toList();
     final cartItems = ref.watch(cartProvider);
 
     final addressState = ref.watch(addressProvider);
@@ -293,9 +374,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final searchQuery = ref.watch(homeSearchProvider);
     final searchResults = ref.read(homeSearchProvider.notifier).filter([
-      ..._popularProducts,
-      ..._newArrivalProducts,
-      ..._recommendedProducts,
+      ...allProducts,
     ]);
 
     final selectedAddress = addressState.selectedAddress;
@@ -476,32 +555,109 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ] else ...[
               const SectionTitle(title: 'Shop by category'),
               const SizedBox(height: 18),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  CategoryItem(
-                    icon: Icons.local_grocery_store_outlined,
-                    title: 'Groceries',
-                    onTap: () => _openCategory(null),
-                  ),
-                  CategoryItem(
-                    icon: Icons.local_drink_outlined,
-                    title: 'Beverages',
-                    onTap: () => _openCategory('beverages'),
-                  ),
-                  CategoryItem(
-                    icon: Icons.breakfast_dining_outlined,
-                    title: 'Snacks',
-                    onTap: () => _openCategory('snacks'),
-                  ),
-                  CategoryItem(
-                    icon: Icons.cleaning_services_outlined,
-                    title: 'Home',
-                    onTap: () => _openCategory('home-care'),
-                  ),
-                ],
+              SizedBox(
+                height: 96,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: catalog.categories.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  itemBuilder: (context, index) {
+                    final category = catalog.categories[index];
+                    return CategoryItem(
+                      icon: Icons.local_grocery_store_outlined,
+                      title: category.name,
+                      imageUrl: category.imageUrl,
+                      onTap: () => _openCategory(category.id),
+                    );
+                  },
+                ),
               ),
               const SizedBox(height: 34),
+
+              if (catalog.bundles.isNotEmpty) ...[
+                const SectionTitle(title: 'Value bundles'),
+                const SizedBox(height: 14),
+                SizedBox(
+                  height: 128,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: catalog.bundles.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (context, index) {
+                      final bundle = catalog.bundles[index];
+                      return InkWell(
+                        onTap: () =>
+                            _showBundleDetails(bundle, catalog.products),
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          width: 220,
+                          decoration: BoxDecoration(
+                            color: QeboxPalette.mint,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              if (bundle.imageUrl?.isNotEmpty == true)
+                                bundle.imageUrl!.startsWith('data:image')
+                                    ? Image.memory(
+                                        base64Decode(
+                                            bundle.imageUrl!.split(',').last),
+                                        fit: BoxFit.cover)
+                                    : Image.network(bundle.imageUrl!,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) =>
+                                            const SizedBox.shrink()),
+                              Container(
+                                  color: bundle.imageUrl?.isNotEmpty == true
+                                      ? Colors.black38
+                                      : Colors.transparent),
+                              Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(bundle.name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 16)),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                        '${bundle.productIds.length} products · EGP ${bundle.price.toStringAsFixed(2)}',
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color:
+                                                bundle.imageUrl?.isNotEmpty ==
+                                                        true
+                                                    ? Colors.white
+                                                    : QeboxPalette.muted)),
+                                    const Spacer(),
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: TextButton.icon(
+                                        onPressed: () => _showBundleDetails(
+                                            bundle, catalog.products),
+                                        icon: const Icon(
+                                            Icons.add_shopping_cart_outlined,
+                                            size: 18),
+                                        label: const Text('Add bundle'),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 30),
+              ],
 
               // =====================================================
               // DEALS
@@ -509,6 +665,75 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
               const SectionTitle(title: 'Deals for you'),
               const SizedBox(height: 16),
+
+              if (banners.isNotEmpty) ...[
+                SizedBox(
+                  height: 190,
+                  child: Stack(children: [
+                    PageView.builder(
+                      controller: _bannerController,
+                      onPageChanged: (index) =>
+                          setState(() => _activeBanner = index),
+                      itemCount: banners.length,
+                      itemBuilder: (context, index) {
+                        final banner = banners[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: banner.imageUrl.startsWith('data:image/')
+                                ? Image.memory(
+                                    base64Decode(
+                                        banner.imageUrl.split(',').last),
+                                    fit: BoxFit.cover)
+                                : Image.network(banner.imageUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) =>
+                                        const SizedBox.shrink()),
+                          ),
+                        );
+                      },
+                    ),
+                    if (banners.length > 1) ...[
+                      Positioned(
+                          left: 8,
+                          top: 72,
+                          child: _bannerArrow(
+                              Icons.chevron_left,
+                              () => _bannerController.previousPage(
+                                  duration: const Duration(milliseconds: 250),
+                                  curve: Curves.easeOut))),
+                      Positioned(
+                          right: 8,
+                          top: 72,
+                          child: _bannerArrow(
+                              Icons.chevron_right,
+                              () => _bannerController.nextPage(
+                                  duration: const Duration(milliseconds: 250),
+                                  curve: Curves.easeOut))),
+                      Positioned(
+                          bottom: 10,
+                          left: 0,
+                          right: 0,
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                for (var i = 0; i < banners.length; i++)
+                                  Container(
+                                      width: i == _activeBanner ? 18 : 7,
+                                      height: 7,
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 3),
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(8)))
+                              ])),
+                    ],
+                  ]),
+                ),
+                const SizedBox(height: 16),
+              ],
 
               Container(
                 width: double.infinity,
@@ -596,9 +821,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: List.generate(
-                    _popularProducts.length,
+                    popularProducts.length,
                     (index) {
-                      final product = _popularProducts[index];
+                      final product = popularProducts[index];
 
                       final quantity = _quantityForProduct(
                         product,
@@ -607,7 +832,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                       return Padding(
                         padding: EdgeInsets.only(
-                          right: index == _popularProducts.length - 1 ? 0 : 14,
+                          right: index == popularProducts.length - 1 ? 0 : 14,
                         ),
                         child: ProductCard(
                           product: product,
@@ -655,9 +880,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: List.generate(
-                    _newArrivalProducts.length,
+                    newArrivalProducts.length,
                     (index) {
-                      final product = _newArrivalProducts[index];
+                      final product = newArrivalProducts[index];
 
                       final quantity = _quantityForProduct(
                         product,
@@ -667,7 +892,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       return Padding(
                         padding: EdgeInsets.only(
                           right:
-                              index == _newArrivalProducts.length - 1 ? 0 : 14,
+                              index == newArrivalProducts.length - 1 ? 0 : 14,
                         ),
                         child: ProductCard(
                           product: product,
@@ -713,9 +938,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
               Column(
                 children: List.generate(
-                  _recommendedProducts.length,
+                  recommendedProducts.length,
                   (index) {
-                    final product = _recommendedProducts[index];
+                    final product = recommendedProducts[index];
 
                     final quantity = _quantityForProduct(
                       product,
@@ -725,12 +950,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     return Padding(
                       padding: EdgeInsets.only(
                         bottom:
-                            index == _recommendedProducts.length - 1 ? 0 : 14,
+                            index == recommendedProducts.length - 1 ? 0 : 14,
                       ),
                       child: _RecommendedCard(
                         product: product,
                         onTap: () => _openProductDetails(product),
-                        badge: _recommendedBadges[index],
+                        badge: _recommendedBadges[
+                            index % _recommendedBadges.length],
                         quantity: quantity,
                         isFavorite: isFavorite(product),
                         onFavoriteTap: () {

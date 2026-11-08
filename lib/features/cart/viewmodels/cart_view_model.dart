@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../products/models/product.dart';
+import '../../products/models/bundle.dart';
 import '../models/cart_item.dart';
 import '../repositories/cart_repository.dart';
 
@@ -47,6 +48,18 @@ class CartViewModel extends StateNotifier<List<CartItem>> {
     );
 
     _setItems(updatedItems);
+  }
+
+  void addBundle(StoreBundle bundle) {
+    final bundleProduct = Product(
+      id: 'bundle:${bundle.id}',
+      name: bundle.name,
+      description: '${bundle.productIds.length} products bundle',
+      price: bundle.price,
+      categoryId: 'bundle',
+      stockQuantity: 999,
+    );
+    addProduct(bundleProduct);
   }
 
   void increaseQuantity(String productId) {
