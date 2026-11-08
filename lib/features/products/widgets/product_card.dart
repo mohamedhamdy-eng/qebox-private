@@ -60,20 +60,27 @@ class ProductCard extends StatelessWidget {
                     color: QeboxPalette.background,
                     borderRadius: BorderRadius.circular(18),
                   ),
-                  child: product.imageUrl != null &&
-                          product.imageUrl!.isNotEmpty
+                  child:
+                      product.imageUrl != null && product.imageUrl!.isNotEmpty
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(18),
                           child: product.imageUrl!.startsWith('data:image/')
                               ? Image.memory(
                                   base64Decode(
-                                      product.imageUrl!.split(',').last),
-                                  fit: BoxFit.cover)
-                              : Image.network(product.imageUrl!,
+                                    product.imageUrl!.split(',').last,
+                                  ),
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.network(
+                                  product.imageUrl!,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) =>
-                                      const Icon(Icons.shopping_bag_outlined,
-                                          size: 48, color: Color(0xFFEE7424))),
+                                      const Icon(
+                                        Icons.shopping_bag_outlined,
+                                        size: 48,
+                                        color: Color(0xFFEE7424),
+                                      ),
+                                ),
                         )
                       : const Icon(
                           Icons.shopping_bag_outlined,
@@ -82,9 +89,9 @@ class ProductCard extends StatelessWidget {
                         ),
                 ),
                 if (product.isNew)
-                  Positioned(
+                  PositionedDirectional(
                     top: 8,
-                    left: 8,
+                    start: 8,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -104,9 +111,9 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                Positioned(
+                PositionedDirectional(
                   top: 8,
-                  right: 8,
+                  end: 8,
                   child: InkWell(
                     onTap: onFavoriteTap,
                     borderRadius: BorderRadius.circular(20),
@@ -145,22 +152,30 @@ class ProductCard extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                Text(
-                  'EGP ${product.price.toStringAsFixed(0)}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFFEE7424),
+                Flexible(
+                  child: Text(
+                    'EGP ${product.price.toStringAsFixed(0)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFFEE7424),
+                    ),
                   ),
                 ),
                 if (product.hasDiscount) ...[
                   const SizedBox(width: 6),
-                  Text(
-                    'EGP ${product.oldPrice!.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                      fontSize: 10,
-                      color: Color(0xFF999999),
-                      decoration: TextDecoration.lineThrough,
+                  Flexible(
+                    child: Text(
+                      'EGP ${product.oldPrice!.toStringAsFixed(0)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Color(0xFF999999),
+                        decoration: TextDecoration.lineThrough,
+                      ),
                     ),
                   ),
                 ],
@@ -196,10 +211,7 @@ class ProductCard extends StatelessWidget {
         ),
         child: const Text(
           'Add to cart',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-          ),
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
         ),
       ),
     );
@@ -222,11 +234,7 @@ class ProductCard extends StatelessWidget {
             child: const SizedBox(
               width: 40,
               height: 36,
-              child: Icon(
-                Icons.remove_rounded,
-                color: Colors.white,
-                size: 19,
-              ),
+              child: Icon(Icons.remove_rounded, color: Colors.white, size: 19),
             ),
           ),
           Text(
@@ -243,11 +251,7 @@ class ProductCard extends StatelessWidget {
             child: const SizedBox(
               width: 40,
               height: 36,
-              child: Icon(
-                Icons.add_rounded,
-                color: Colors.white,
-                size: 19,
-              ),
+              child: Icon(Icons.add_rounded, color: Colors.white, size: 19),
             ),
           ),
         ],
