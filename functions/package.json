@@ -16,5 +16,8 @@
   "devDependencies": {
     "@firebase/rules-unit-testing": "^6.0.0",
     "firebase": "^13.2.0"
+  },
+  "overrides": {
+    "rimraf": "^6.1.4"
   }
 }
