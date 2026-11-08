@@ -3,16 +3,28 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/order.dart';
+
+/// [message] is safe to show to the customer.
+class OrderSubmissionException implements Exception {
+  const OrderSubmissionException(this.message);
+
+  final String message;
+}
 
 abstract interface class OrdersRepository {
   List<CustomerOrder> loadOrders(String customerId);
 
   void saveOrders(String customerId, List<CustomerOrder> orders);
 
+  /// Throws [OrderSubmissionException] if the store does not accept the order.
   Future<void> publishOrder(CustomerOrder order);
+
+  /// Throws [OrderSubmissionException] if the store does not cancel the order.
+  Future<void> publishCancellation(String orderId, String reason);
 
   Stream<List<CustomerOrder>> watchRemoteOrders();
 }
@@ -32,11 +44,7 @@ class LocalOrdersRepository implements OrdersRepository {
     try {
       final decoded = jsonDecode(value) as List<dynamic>;
       return decoded
-          .map(
-            (order) => CustomerOrder.fromJson(
-              order as Map<String, dynamic>,
-            ),
-          )
+          .map((order) => CustomerOrder.fromJson(order as Map<String, dynamic>))
           .toList();
     } on FormatException {
       return [];
@@ -60,6 +68,9 @@ class LocalOrdersRepository implements OrdersRepository {
   Future<void> publishOrder(CustomerOrder order) async {}
 
   @override
+  Future<void> publishCancellation(String orderId, String reason) async {}
+
+  @override
   Stream<List<CustomerOrder>> watchRemoteOrders() => const Stream.empty();
 }
 
@@ -68,13 +79,34 @@ class FirestoreOrdersRepository implements OrdersRepository {
     required LocalOrdersRepository local,
     required FirebaseFirestore firestore,
     required FirebaseAuth auth,
-  })  : _local = local,
-        _firestore = firestore,
-        _auth = auth;
+    required FirebaseFunctions functions,
+  }) : _local = local,
+       _firestore = firestore,
+       _auth = auth,
+       _functions = functions;
 
   final LocalOrdersRepository _local;
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
+  final FirebaseFunctions _functions;
+
+  Future<void> _call(String name, Map<String, Object?> data) async {
+    try {
+      await _functions.httpsCallable(name).call<Object?>(data);
+    } on FirebaseFunctionsException catch (error) {
+      throw OrderSubmissionException(switch (error.code) {
+        'failed-precondition' || 'invalid-argument' || 'already-exists' =>
+          error.message ?? 'Please review your order and try again.',
+        'unauthenticated' => 'Please sign in again and try once more.',
+        _ => _connectionError,
+      });
+    } on Exception {
+      throw const OrderSubmissionException(_connectionError);
+    }
+  }
+
+  static const _connectionError =
+      'Could not reach Qebox. Check your connection and try again.';
 
   @override
   List<CustomerOrder> loadOrders(String customerId) =>
@@ -85,44 +117,35 @@ class FirestoreOrdersRepository implements OrdersRepository {
       _local.saveOrders(customerId, orders);
 
   @override
-  Future<void> publishOrder(CustomerOrder order) async {
-    final user = _auth.currentUser;
-    if (user == null) {
-      throw StateError('A Development Firebase session is required.');
-    }
-    await _firestore.collection('orders').doc(order.id).set({
-      'id': order.id,
-      'customerId': user.uid,
-      'customerReference': order.customerId,
-      'customerName': order.customerName,
-      'customerPhone': order.customerPhone,
-      'items': order.items.map((item) => item.toJson()).toList(),
-      'itemCount': order.items
-          .fold<int>(0, (runningTotal, item) => runningTotal + item.quantity),
-      'branchName': order.addressLabel,
-      'totalAmount': order.total,
-      'subtotal': order.subtotal,
-      'discount': order.discount,
-      'deliveryFee': order.deliveryFee,
-      'paymentMethod': order.paymentMethod.name,
-      'status': 'Pending',
-      'addressSnapshot': {
-        'label': order.addressLabel,
-        'line': order.addressLine,
-        'building': order.building,
-        'floor': order.floor,
-        'apartment': order.apartment,
-        'landmark': order.landmark,
-      },
-      'deliveryStart': Timestamp.fromDate(order.deliveryStart),
-      'deliveryEnd': Timestamp.fromDate(order.deliveryEnd),
-      'orderNote': order.orderNote,
-      'promoCode': order.promoCode,
-      'substitutionPreference': order.substitutionPreference,
-      'deliveryInstruction': order.deliveryInstruction,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-  }
+  Future<void> publishOrder(CustomerOrder order) => _call('placeOrder', {
+    'orderId': order.id,
+    'items': order.items
+        .map((item) => {'productId': item.productId, 'quantity': item.quantity})
+        .toList(),
+    'expectedTotal': order.total,
+    'promoCode': order.promoCode,
+    'customerReference': order.customerId,
+    'customerName': order.customerName,
+    'customerPhone': order.customerPhone,
+    'paymentMethod': order.paymentMethod.name,
+    'address': {
+      'label': order.addressLabel,
+      'line': order.addressLine,
+      'building': order.building,
+      'floor': order.floor,
+      'apartment': order.apartment,
+      'landmark': order.landmark,
+    },
+    'deliveryStart': order.deliveryStart.millisecondsSinceEpoch,
+    'deliveryEnd': order.deliveryEnd.millisecondsSinceEpoch,
+    'orderNote': order.orderNote,
+    'substitutionPreference': order.substitutionPreference,
+    'deliveryInstruction': order.deliveryInstruction,
+  });
+
+  @override
+  Future<void> publishCancellation(String orderId, String reason) =>
+      _call('cancelOrder', {'orderId': orderId, 'reason': reason});
 
   @override
   Stream<List<CustomerOrder>> watchRemoteOrders() {
@@ -132,7 +155,11 @@ class FirestoreOrdersRepository implements OrdersRepository {
         .collection('orders')
         .where('customerId', isEqualTo: user.uid)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map(_fromDocument).toList());
+        .map(
+          (snapshot) =>
+              snapshot.docs.map(_fromDocument).toList()
+                ..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
+        );
   }
 
   CustomerOrder _fromDocument(DocumentSnapshot<Map<String, dynamic>> document) {
@@ -142,6 +169,7 @@ class FirestoreOrdersRepository implements OrdersRepository {
     final address = rawAddress is Map ? rawAddress : const <String, dynamic>{};
     final status = switch (data['status']) {
       'Preparing' => OrderStatus.preparing,
+      'Driver Assigned' => OrderStatus.driverAssigned,
       'Out For Delivery' => OrderStatus.outForDelivery,
       'Delivered' => OrderStatus.delivered,
       'Cancelled' => OrderStatus.cancelled,
@@ -155,10 +183,13 @@ class FirestoreOrdersRepository implements OrdersRepository {
       customerPhone: (data['customerPhone'] ?? '') as String,
       items: rawItems is List
           ? rawItems
-              .whereType<Map>()
-              .map((item) => OrderItem.fromJson(
-                  item.map((key, value) => MapEntry('$key', value))))
-              .toList()
+                .whereType<Map>()
+                .map(
+                  (item) => OrderItem.fromJson(
+                    item.map((key, value) => MapEntry('$key', value)),
+                  ),
+                )
+                .toList()
           : const [],
       addressLabel: (address['label'] ?? data['branchName'] ?? '') as String,
       addressLine: (address['line'] ?? '') as String,
@@ -180,6 +211,7 @@ class FirestoreOrdersRepository implements OrdersRepository {
           (data['substitutionPreference'] ?? 'contactMe') as String,
       deliveryInstruction:
           (data['deliveryInstruction'] ?? 'Call on arrival') as String,
+      cancellationReason: data['cancellationReason'] as String?,
       subtotal: ((data['subtotal'] ?? 0) as num).toDouble(),
       discount: ((data['discount'] ?? 0) as num).toDouble(),
       deliveryFee: ((data['deliveryFee'] ?? 0) as num).toDouble(),

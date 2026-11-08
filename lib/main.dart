@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,6 +19,8 @@ import 'features/cart/repositories/cart_repository.dart';
 import 'features/cart/viewmodels/cart_view_model.dart';
 import 'features/checkout/repositories/coupon_repository.dart';
 import 'features/checkout/viewmodels/checkout_view_model.dart';
+import 'features/chat/repositories/chat_repository.dart';
+import 'features/chat/viewmodels/chat_view_model.dart';
 import 'features/chat/widgets/q_bot_launcher.dart';
 import 'features/favorites/repositories/favorites_repository.dart';
 import 'features/favorites/viewmodels/favorites_view_model.dart';
@@ -45,22 +50,46 @@ Future<void> main() async {
     }
   }
   final preferences = await SharedPreferences.getInstance();
+  final functions = FirebaseFunctions.instanceFor(app: firebaseApp);
 
   runApp(
     ProviderScope(
       overrides: [
         customerProvider.overrideWith(
-          (ref) => CustomerViewModel(LocalCustomerRepository(preferences)),
+          (ref) => CustomerViewModel(
+            FirestoreCustomerRepository(
+              local: LocalCustomerRepository(preferences),
+              firestore: firestore,
+              auth: firebaseAuth,
+            ),
+          ),
         ),
         phoneAuthRepositoryProvider.overrideWithValue(
           FirebasePhoneAuthRepository(firebaseAuth),
         ),
-        cartProvider.overrideWith(
-          (ref) => CartViewModel(LocalCartRepository(preferences)),
-        ),
+        cartProvider.overrideWith((ref) {
+          final viewModel = CartViewModel(LocalCartRepository(preferences));
+          ref.listen<CatalogState>(
+            catalogProvider,
+            (previous, next) {
+              if (next.productsConfirmed && next.bundlesConfirmed) {
+                viewModel.syncWithCatalog(
+                  products: next.products,
+                  bundles: next.bundles,
+                );
+              }
+            },
+            fireImmediately: true,
+          );
+          return viewModel;
+        }),
         addressProvider.overrideWith((ref) {
           final viewModel = AddressViewModel(
-            LocalAddressRepository(preferences),
+            FirestoreAddressRepository(
+              local: LocalAddressRepository(preferences),
+              firestore: firestore,
+              auth: firebaseAuth,
+            ),
             ref.read(customerProvider).customer?.id,
           );
           ref.listen<CustomerState>(customerProvider, (previous, next) {
@@ -68,11 +97,23 @@ Future<void> main() async {
           });
           return viewModel;
         }),
-        favoritesProvider.overrideWith(
-          (ref) => FavoritesViewModel(
-            LocalFavoritesRepository(preferences),
-          ),
-        ),
+        favoritesProvider.overrideWith((ref) {
+          final viewModel = FavoritesViewModel(
+            FirestoreFavoritesRepository(
+              local: LocalFavoritesRepository(preferences),
+              firestore: firestore,
+              auth: firebaseAuth,
+            ),
+          );
+          ref.listen<CustomerState>(
+            customerProvider,
+            (previous, next) {
+              unawaited(viewModel.syncCustomer(next.customer?.id));
+            },
+            fireImmediately: true,
+          );
+          return viewModel;
+        }),
         onboardingProvider.overrideWith(
           (ref) => OnboardingViewModel(
             LocalOnboardingRepository(preferences),
@@ -84,6 +125,7 @@ Future<void> main() async {
               local: LocalOrdersRepository(preferences),
               firestore: firestore,
               auth: firebaseAuth,
+              functions: functions,
             ),
             ref.read(customerProvider).customer?.id,
           );
@@ -96,7 +138,10 @@ Future<void> main() async {
           (ref) => CatalogViewModel(FirestoreCatalogRepository(firestore)),
         ),
         couponRepositoryProvider.overrideWithValue(
-          FirestoreCouponRepository(firestore),
+          CallableCouponRepository(functions),
+        ),
+        chatRepositoryProvider.overrideWithValue(
+          FirebaseQBotRepository(functions: functions, auth: firebaseAuth),
         ),
       ],
       child: const QeboxPrivateApp(),

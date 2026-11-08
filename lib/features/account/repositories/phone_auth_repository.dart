@@ -22,6 +22,9 @@ abstract interface class PhoneAuthRepository {
   });
 
   Future<void> signOut();
+
+  /// Starts an anonymous session for debug-only logins.
+  Future<void> ensureDevelopmentSession();
 }
 
 class FirebasePhoneAuthRepository implements PhoneAuthRepository {
@@ -95,6 +98,13 @@ class FirebasePhoneAuthRepository implements PhoneAuthRepository {
 
   @override
   Future<void> signOut() => _firebaseAuth.signOut();
+
+  @override
+  Future<void> ensureDevelopmentSession() async {
+    if (_firebaseAuth.currentUser == null) {
+      await _firebaseAuth.signInAnonymously();
+    }
+  }
 }
 
 final phoneAuthRepositoryProvider = Provider<PhoneAuthRepository>(

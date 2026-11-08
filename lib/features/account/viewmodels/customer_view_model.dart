@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/customer.dart';
@@ -11,10 +14,7 @@ class CustomerState {
   // بعدين الـBackend / Firebase هيكون هو مصدر الحسابات الحقيقي.
   final Map<String, Customer> registeredCustomers;
 
-  const CustomerState({
-    this.customer,
-    this.registeredCustomers = const {},
-  });
+  const CustomerState({this.customer, this.registeredCustomers = const {}});
 
   // =====================================================
   // AUTH STATUS
@@ -31,9 +31,7 @@ class CustomerState {
   bool isPhoneRegistered(String phone) {
     final normalizedPhone = phone.trim();
 
-    return registeredCustomers.containsKey(
-      normalizedPhone,
-    );
+    return registeredCustomers.containsKey(normalizedPhone);
   }
 
   Customer? getCustomerByPhone(String phone) {
@@ -60,12 +58,12 @@ class CustomerState {
 
 class CustomerViewModel extends StateNotifier<CustomerState> {
   CustomerViewModel(this._repository)
-      : super(
-          CustomerState(
-            customer: _repository.loadActiveCustomer(),
-            registeredCustomers: _repository.loadRegisteredCustomers(),
-          ),
-        );
+    : super(
+        CustomerState(
+          customer: _repository.loadActiveCustomer(),
+          registeredCustomers: _repository.loadRegisteredCustomers(),
+        ),
+      );
 
   final CustomerRepository _repository;
 
@@ -103,16 +101,11 @@ class CustomerViewModel extends StateNotifier<CustomerState> {
   // يرجع null لو الرقم مسجل بالفعل.
   // =====================================================
 
-  Customer? signUp({
-    required String name,
-    required String phone,
-  }) {
+  Customer? signUp({required String name, required String phone}) {
     final normalizedName = name.trim();
     final normalizedPhone = phone.trim();
 
-    if (state.isPhoneRegistered(
-      normalizedPhone,
-    )) {
+    if (state.isPhoneRegistered(normalizedPhone)) {
       return null;
     }
 
@@ -143,14 +136,10 @@ class CustomerViewModel extends StateNotifier<CustomerState> {
   // يرجع null لو مفيش حساب بالرقم ده.
   // =====================================================
 
-  Customer? signIn({
-    required String phone,
-  }) {
+  Customer? signIn({required String phone}) {
     final normalizedPhone = phone.trim();
 
-    final existingCustomer = state.getCustomerByPhone(
-      normalizedPhone,
-    );
+    final existingCustomer = state.getCustomerByPhone(normalizedPhone);
 
     if (existingCustomer == null) {
       return null;
@@ -172,11 +161,13 @@ class CustomerViewModel extends StateNotifier<CustomerState> {
   }) {
     final normalizedPhone = phone.trim();
     final existingCustomer = state.getCustomerByPhone(normalizedPhone);
-    final customer = existingCustomer ??
+    final customer =
+        existingCustomer ??
         Customer(
           id: userId,
-          name:
-              name?.trim().isNotEmpty == true ? name!.trim() : 'Qebox Customer',
+          name: name?.trim().isNotEmpty == true
+              ? name!.trim()
+              : 'Qebox Customer',
           phone: normalizedPhone,
         );
     final updatedCustomers = Map<String, Customer>.from(
@@ -188,19 +179,43 @@ class CustomerViewModel extends StateNotifier<CustomerState> {
       registeredCustomers: updatedCustomers,
     );
     _saveState();
+    if (name?.trim().isNotEmpty == true) {
+      _repository.saveRemoteProfile(customer);
+    } else {
+      unawaited(_restoreRemoteProfile(customer));
+    }
     return customer;
+  }
+
+  /// A sign-in on a new device has no local name, so the account name wins.
+  Future<void> _restoreRemoteProfile(Customer signedIn) async {
+    try {
+      final remoteName = await _repository.fetchRemoteName();
+      if (!mounted || state.customer?.phone != signedIn.phone) return;
+      if (remoteName == null || remoteName.isEmpty) {
+        _repository.saveRemoteProfile(state.customer!);
+        return;
+      }
+      final updated = state.customer!.copyWith(name: remoteName);
+      state = CustomerState(
+        customer: updated,
+        registeredCustomers: {
+          ...state.registeredCustomers,
+          updated.phone.trim(): updated,
+        },
+      );
+      _saveState();
+    } catch (error) {
+      debugPrint('Profile restore failed: $error');
+    }
   }
 
   // =====================================================
   // CHECK PHONE
   // =====================================================
 
-  bool isPhoneRegistered(
-    String phone,
-  ) {
-    return state.isPhoneRegistered(
-      phone,
-    );
+  bool isPhoneRegistered(String phone) {
+    return state.isPhoneRegistered(phone);
   }
 
   // =====================================================
@@ -214,9 +229,7 @@ class CustomerViewModel extends StateNotifier<CustomerState> {
       return;
     }
 
-    final updatedCustomer = currentCustomer.copyWith(
-      name: name.trim(),
-    );
+    final updatedCustomer = currentCustomer.copyWith(name: name.trim());
 
     final updatedCustomers = Map<String, Customer>.from(
       state.registeredCustomers,
@@ -229,6 +242,7 @@ class CustomerViewModel extends StateNotifier<CustomerState> {
       registeredCustomers: updatedCustomers,
     );
     _saveState();
+    _repository.saveRemoteProfile(updatedCustomer);
   }
 
   // =====================================================
@@ -246,17 +260,13 @@ class CustomerViewModel extends StateNotifier<CustomerState> {
 
     final newPhone = phone.trim();
 
-    final updatedCustomer = currentCustomer.copyWith(
-      phone: newPhone,
-    );
+    final updatedCustomer = currentCustomer.copyWith(phone: newPhone);
 
     final updatedCustomers = Map<String, Customer>.from(
       state.registeredCustomers,
     );
 
-    updatedCustomers.remove(
-      oldPhone,
-    );
+    updatedCustomers.remove(oldPhone);
 
     updatedCustomers[newPhone] = updatedCustomer;
 
@@ -265,6 +275,7 @@ class CustomerViewModel extends StateNotifier<CustomerState> {
       registeredCustomers: updatedCustomers,
     );
     _saveState();
+    _repository.saveRemoteProfile(updatedCustomer);
   }
 
   // =====================================================
@@ -276,18 +287,14 @@ class CustomerViewModel extends StateNotifier<CustomerState> {
     // لكن بنحتفظ بالحسابات مؤقتًا أثناء تشغيل التطبيق
     // عشان نقدر نجرب Sign In مرة أخرى.
 
-    state = CustomerState(
-      registeredCustomers: state.registeredCustomers,
-    );
+    state = CustomerState(registeredCustomers: state.registeredCustomers);
     _saveState();
   }
 }
 
 final customerProvider =
-    StateNotifierProvider<CustomerViewModel, CustomerState>(
-  (ref) {
-    throw UnimplementedError(
-      'customerProvider must be overridden with a repository in main.',
-    );
-  },
-);
+    StateNotifierProvider<CustomerViewModel, CustomerState>((ref) {
+      throw UnimplementedError(
+        'customerProvider must be overridden with a repository in main.',
+      );
+    });

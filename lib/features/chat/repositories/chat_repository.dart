@@ -1,84 +1,38 @@
-import 'dart:convert';
-
-import 'package:http/http.dart' as http;
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 abstract class ChatRepository {
   Future<String> sendMessage(String message);
 }
 
-class GeminiQBotRepository implements ChatRepository {
-  GeminiQBotRepository({
-    required this.apiKey,
-    this.model = 'gemini-2.5-flash',
-    http.Client? client,
-  }) : _client = client ?? http.Client();
+/// Sends messages to the askQBot function, which keeps the Gemini key on the
+/// server. Guests and failed calls receive the built-in answers.
+class FirebaseQBotRepository implements ChatRepository {
+  FirebaseQBotRepository({
+    required FirebaseFunctions functions,
+    required FirebaseAuth auth,
+    ChatRepository fallback = const LocalQBotRepository(),
+  }) : _functions = functions,
+       _auth = auth,
+       _fallback = fallback;
 
-  final String apiKey;
-  final String model;
-  final http.Client _client;
+  final FirebaseFunctions _functions;
+  final FirebaseAuth _auth;
+  final ChatRepository _fallback;
 
   @override
   Future<String> sendMessage(String message) async {
-    final uri = Uri.https(
-      'generativelanguage.googleapis.com',
-      '/v1beta/models/$model:generateContent',
-    );
-    final response = await _client
-        .post(
-          uri,
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey,
-          },
-          body: jsonEncode({
-            'systemInstruction': {
-              'parts': [
-                {
-                  'text': 'You are Q Bot, the friendly Qebox grocery shopping '
-                      'assistant. Give concise, helpful answers about shopping, '
-                      'products, orders, delivery, checkout, promotions, and '
-                      'accounts. Never invent an order status, price, refund, or '
-                      'policy. Never claim that you added, removed, or changed '
-                      'cart items; cart actions are handled by the app. Tell the '
-                      'customer when staff assistance is needed.',
-                },
-              ],
-            },
-            'contents': [
-              {
-                'role': 'user',
-                'parts': [
-                  {'text': message},
-                ],
-              },
-            ],
-            'generationConfig': {
-              'temperature': 0.4,
-              'maxOutputTokens': 350,
-            },
-          }),
-        )
-        .timeout(const Duration(seconds: 20));
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception('Gemini request failed (${response.statusCode}).');
+    if (_auth.currentUser == null) return _fallback.sendMessage(message);
+    try {
+      final result = await _functions
+          .httpsCallable('askQBot')
+          .call<Map<Object?, Object?>>({'message': message});
+      final answer = result.data['answer']?.toString().trim() ?? '';
+      if (answer.isNotEmpty) return answer;
+    } on FirebaseFunctionsException {
+      // The built-in answers below keep Q Bot useful during an outage.
     }
-    final body = jsonDecode(response.body) as Map<String, dynamic>;
-    final candidates = body['candidates'] as List<dynamic>?;
-    if (candidates == null || candidates.isEmpty) {
-      throw Exception('Gemini returned no answer.');
-    }
-    final content = candidates.first['content'] as Map<String, dynamic>?;
-    final parts = content?['parts'] as List<dynamic>?;
-    final answer = parts
-        ?.map(
-            (part) => (part as Map<String, dynamic>)['text']?.toString() ?? '')
-        .join('\n')
-        .trim();
-    if (answer == null || answer.isEmpty) {
-      throw Exception('Gemini returned an empty answer.');
-    }
-    return answer;
+    return _fallback.sendMessage(message);
   }
 }
 
@@ -90,7 +44,7 @@ class LocalQBotRepository implements ChatRepository {
     await Future<void>.delayed(const Duration(milliseconds: 450));
     final text = message.toLowerCase().trim();
 
-    if (RegExp('[\u0600-\u06ff]').hasMatch(text)) {
+    if (RegExp('[؀-ۿ]').hasMatch(text)) {
       return 'أنا Q Bot. أقدر أساعدك في المنتجات، السلة، الأوردرات، التوصيل، الدفع، والكوبونات. اكتب اسم المنتج والكمية التي تريدها وسأجهز السلة.';
     }
 
@@ -104,7 +58,7 @@ class LocalQBotRepository implements ChatRepository {
       return 'Please check the order timeline first. If the delivery window has passed, share the order number with customer support.';
     }
     if (_contains(text, ['payment', 'card', 'cash', 'wallet'])) {
-      return 'Qebox supports the payment methods shown during checkout. Card and wallet services depend on the configured payment provider.';
+      return 'Qebox currently accepts cash on delivery.';
     }
     if (_contains(text, ['promo', 'discount', 'coupon', 'offer'])) {
       return 'Enter your promo code during checkout. Q Bot will show whether it is valid and any minimum-order requirement.';

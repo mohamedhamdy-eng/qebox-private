@@ -43,8 +43,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
   final _signUpNameController = TextEditingController();
   final _signUpPhoneController = TextEditingController();
   final _signUpOtpController = TextEditingController();
-  final _developmentUsernameController = TextEditingController();
-  final _developmentPasswordController = TextEditingController();
 
   // =====================================================
   // VALIDATION
@@ -330,6 +328,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         ? _signUpPhoneController.text.trim()
         : _signInPhoneController.text.trim();
     final name = signUp ? _signUpNameController.text.trim() : null;
+    await ref.read(phoneAuthRepositoryProvider).ensureDevelopmentSession();
+    if (!mounted) return;
     ref.read(customerProvider.notifier).authenticateWithFirebase(
           userId: 'DEV-$phone',
           phone: phone,
@@ -338,53 +338,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     await _authenticationCompleted();
   }
 
-  Future<void> _loginWithDevelopmentCredentials() async {
-    _developmentUsernameController.clear();
-    _developmentPasswordController.clear();
-    final accepted = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Development login'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _developmentUsernameController,
-              decoration: const InputDecoration(labelText: 'Username'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _developmentPasswordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Password'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              final valid =
-                  _developmentUsernameController.text.trim() == 'qebox' &&
-                      _developmentPasswordController.text == 'Qebox@123';
-              if (!valid) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Invalid username or password')),
-                );
-                return;
-              }
-              Navigator.pop(dialogContext, true);
-            },
-            child: const Text('Login'),
-          ),
-        ],
-      ),
-    );
-    if (accepted != true || !mounted) return;
-
+  Future<void> _loginWithDevelopmentAccount() async {
+    await ref.read(phoneAuthRepositoryProvider).ensureDevelopmentSession();
+    if (!mounted) return;
     ref.read(customerProvider.notifier).authenticateWithFirebase(
           userId: 'DEV-QEBOX-ACCOUNT',
           phone: '01000000000',
@@ -461,8 +417,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     _signUpNameController.dispose();
     _signUpPhoneController.dispose();
     _signUpOtpController.dispose();
-    _developmentUsernameController.dispose();
-    _developmentPasswordController.dispose();
 
     super.dispose();
   }
@@ -649,7 +603,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               const SizedBox(height: 10),
               _DevelopmentLoginButton(
                 label: 'Login with development account',
-                onPressed: _loginWithDevelopmentCredentials,
+                onPressed: _loginWithDevelopmentAccount,
               ),
             ],
           ],

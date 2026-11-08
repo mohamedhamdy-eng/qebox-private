@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,6 +16,7 @@ import '../../cart/viewmodels/cart_view_model.dart';
 import '../../cart/viewmodels/order_note_view_model.dart';
 
 import '../../orders/models/order.dart';
+import '../../orders/repositories/orders_repository.dart';
 import '../../orders/viewmodels/orders_view_model.dart';
 import '../../orders/views/order_confirmed_screen.dart';
 
@@ -32,6 +35,9 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   final TextEditingController _promoController = TextEditingController();
+  bool _isPlacingOrder = false;
+  String? _pendingOrderId;
+  String? _pendingCartSignature;
 
   @override
   void dispose() {
@@ -66,9 +72,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     // بعدين تيجي من الـ Backend / Dashboard
     const double deliveryFee = 20.0;
 
-    final discount = checkoutState.discountAmount > subtotal
-        ? subtotal
-        : checkoutState.discountAmount;
+    final discount = checkoutState.discountFor(subtotal);
+
+    final promoMessage = checkoutState.promoMessageFor(subtotal);
 
     final total = subtotal - discount + deliveryFee;
 
@@ -580,16 +586,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         ),
                       ],
                     ),
-                    if (checkoutState.promoMessage != null) ...[
+                    if (promoMessage != null) ...[
                       const SizedBox(height: 10),
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          checkoutState.promoMessage!,
+                          promoMessage,
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: checkoutState.discountAmount > 0
+                            color: discount > 0
                                 ? const Color(
                                     0xFF2E7D32,
                                   )
@@ -617,7 +623,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               const SizedBox(height: 6),
 
               const Text(
-                'Choose how you want to pay.',
+                'Qebox currently accepts cash on delivery.',
                 style: TextStyle(
                   fontSize: 12,
                   color: Color(0xFF777777),
@@ -639,38 +645,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       .selectPaymentMethod(
                         PaymentMethod.cash,
                       );
-                },
-              ),
-
-              const SizedBox(height: 12),
-
-              _PaymentOption(
-                title: 'Credit / Debit Card',
-                subtitle: 'Pay securely using your card',
-                icon: Icons.credit_card_rounded,
-                selected: checkoutState.paymentMethod == PaymentMethod.card,
-                onTap: () {
-                  ref
-                      .read(
-                        checkoutProvider.notifier,
-                      )
-                      .selectPaymentMethod(
-                        PaymentMethod.card,
-                      );
-                },
-              ),
-
-              const SizedBox(height: 12),
-
-              _PaymentOption(
-                title: 'Qebox Wallet',
-                subtitle: 'Use your Qebox wallet balance',
-                icon: Icons.account_balance_wallet_outlined,
-                selected: checkoutState.paymentMethod == PaymentMethod.wallet,
-                onTap: () {
-                  ref
-                      .read(checkoutProvider.notifier)
-                      .selectPaymentMethod(PaymentMethod.wallet);
                 },
               ),
 
@@ -852,7 +826,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: canPlaceOrder
+                  onPressed: canPlaceOrder && !_isPlacingOrder
                       ? () async {
                           await _handlePlaceOrder(
                             context: context,
@@ -882,7 +856,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     ),
                   ),
                   child: Text(
-                    'Place Order • EGP ${total.toStringAsFixed(2)}',
+                    _isPlacingOrder
+                        ? 'Placing order...'
+                        : 'Place Order • EGP ${total.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
@@ -937,7 +913,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       return;
     }
 
-    _placeOrder(
+    await _placeOrder(
       context: context,
       customer: customer,
       cartItems: cartItems,
@@ -956,7 +932,22 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   // CREATE ORDER
   // ==========================================
 
-  void _placeOrder({
+  /// A retry of the same cart reuses the order number. The server then returns
+  /// the first order if only its response was lost.
+  String _orderIdFor(String cartSignature, DateTime now) {
+    if (_pendingOrderId != null && _pendingCartSignature == cartSignature) {
+      return _pendingOrderId!;
+    }
+    final random = Random.secure();
+    final suffix = List.generate(
+      4,
+      (_) => random.nextInt(16).toRadixString(16),
+    ).join().toUpperCase();
+    _pendingCartSignature = cartSignature;
+    return _pendingOrderId = 'QB-${now.millisecondsSinceEpoch}-$suffix';
+  }
+
+  Future<void> _placeOrder({
     required BuildContext context,
     required Customer customer,
     required List<CartItem> cartItems,
@@ -968,7 +959,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     required double discount,
     required double deliveryFee,
     required double total,
-  }) {
+  }) async {
     final deliveryStart = deliverySchedule.deliveryStartDateTime;
 
     final deliveryEnd = deliverySchedule.deliveryEndDateTime;
@@ -979,8 +970,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     final now = DateTime.now();
 
+    final cartSignature = [
+      ...cartItems.map((item) => '${item.product.id}:${item.quantity}'),
+      total,
+      checkoutState.promoCode,
+    ].join('|');
+
     final order = CustomerOrder(
-      id: 'QB-${now.millisecondsSinceEpoch}',
+      id: _orderIdFor(cartSignature, now),
 
       customerId: customer.id,
 
@@ -1045,11 +1042,20 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     // SAVE ORDER
     // ==========================================
 
-    ref
-        .read(
-          ordersProvider.notifier,
-        )
-        .createOrder(order);
+    setState(() => _isPlacingOrder = true);
+    try {
+      await ref.read(ordersProvider.notifier).createOrder(order);
+    } on OrderSubmissionException catch (error) {
+      if (!context.mounted) return;
+      setState(() => _isPlacingOrder = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message)),
+      );
+      return;
+    }
+    if (!context.mounted) return;
+    _isPlacingOrder = false;
+    _pendingOrderId = null;
 
     // ==========================================
     // CLEAR CART
@@ -1332,7 +1338,7 @@ class _PreferenceDropdown<T> extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           DropdownButtonFormField<T>(
-            value: value,
+            initialValue: value,
             isExpanded: true,
             decoration: InputDecoration(
               filled: true,

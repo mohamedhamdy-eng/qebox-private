@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kReleaseMode;
 
 import '../../firebase_options.dart';
 
@@ -7,7 +8,7 @@ enum AppEnvironment { development, production }
 abstract final class AppFirebaseOptions {
   static const _environment = String.fromEnvironment(
     'APP_ENV',
-    defaultValue: 'development',
+    defaultValue: kReleaseMode ? 'production' : 'development',
   );
 
   static AppEnvironment get environment => _environment == 'production'

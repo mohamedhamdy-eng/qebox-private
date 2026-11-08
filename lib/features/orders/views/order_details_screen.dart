@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/order.dart';
+import '../repositories/orders_repository.dart';
 import '../viewmodels/orders_view_model.dart';
 
 class OrderDetailsScreen extends ConsumerWidget {
   final CustomerOrder order;
 
-  const OrderDetailsScreen({
-    super.key,
-    required this.order,
-  });
+  const OrderDetailsScreen({super.key, required this.order});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,10 +25,7 @@ class OrderDetailsScreen extends ConsumerWidget {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          icon: const Icon(
-            Icons.arrow_back_rounded,
-            color: Color(0xFF171717),
-          ),
+          icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF171717)),
         ),
         title: const Text(
           'Order details',
@@ -42,19 +37,13 @@ class OrderDetailsScreen extends ConsumerWidget {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(
-          20,
-          10,
-          20,
-          30,
-        ),
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // =====================================================
             // ORDER NUMBER + STATUS
             // =====================================================
-
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(18),
@@ -147,7 +136,6 @@ class OrderDetailsScreen extends ConsumerWidget {
             // =====================================================
             // ORDER JOURNEY
             // =====================================================
-
             const Text(
               'Order journey',
               style: TextStyle(
@@ -161,10 +149,7 @@ class OrderDetailsScreen extends ConsumerWidget {
 
             const Text(
               'Follow the progress of your order.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Color(0xFF777777),
-              ),
+              style: TextStyle(fontSize: 12, color: Color(0xFF777777)),
             ),
 
             const SizedBox(height: 14),
@@ -244,10 +229,7 @@ class OrderDetailsScreen extends ConsumerWidget {
                 ),
                 child: const Row(
                   children: [
-                    Icon(
-                      Icons.cancel_outlined,
-                      color: Color(0xFFE53935),
-                    ),
+                    Icon(Icons.cancel_outlined, color: Color(0xFFE53935)),
                     SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -269,7 +251,6 @@ class OrderDetailsScreen extends ConsumerWidget {
             // =====================================================
             // CUSTOMER DETAILS
             // =====================================================
-
             const Text(
               'Customer details',
               style: TextStyle(
@@ -298,9 +279,7 @@ class OrderDetailsScreen extends ConsumerWidget {
                         : order.customerName,
                   ),
                   const Padding(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 16,
-                    ),
+                    padding: EdgeInsets.symmetric(vertical: 16),
                     child: Divider(height: 1),
                   ),
                   _InfoRow(
@@ -311,9 +290,7 @@ class OrderDetailsScreen extends ConsumerWidget {
                         : order.customerPhone,
                   ),
                   const Padding(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 16,
-                    ),
+                    padding: EdgeInsets.symmetric(vertical: 16),
                     child: Divider(height: 1),
                   ),
                   _InfoRow(
@@ -332,7 +309,6 @@ class OrderDetailsScreen extends ConsumerWidget {
             // =====================================================
             // DELIVERY
             // =====================================================
-
             const Text(
               'Delivery',
               style: TextStyle(
@@ -359,9 +335,7 @@ class OrderDetailsScreen extends ConsumerWidget {
                     value: _deliveryText(order),
                   ),
                   const Padding(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 16,
-                    ),
+                    padding: EdgeInsets.symmetric(vertical: 16),
                     child: Divider(height: 1),
                   ),
                   _InfoRow(
@@ -396,7 +370,6 @@ class OrderDetailsScreen extends ConsumerWidget {
             // =====================================================
             // ITEMS
             // =====================================================
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -428,107 +401,100 @@ class OrderDetailsScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(22),
               ),
               child: Column(
-                children: List.generate(
-                  order.items.length,
-                  (index) {
-                    final item = order.items[index];
+                children: List.generate(order.items.length, (index) {
+                  final item = order.items[index];
 
-                    return Column(
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 58,
-                              height: 58,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF3F1ED),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: item.imageUrl != null &&
-                                      item.imageUrl!.isNotEmpty
-                                  ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(16),
-                                      child: Image.network(
-                                        item.imageUrl!,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (
-                                          context,
-                                          error,
-                                          stackTrace,
-                                        ) {
-                                          return const Icon(
-                                            Icons.shopping_bag_outlined,
-                                            color: Color(0xFFEE7424),
-                                          );
-                                        },
-                                      ),
-                                    )
-                                  : const Icon(
-                                      Icons.shopping_bag_outlined,
-                                      color: Color(0xFFEE7424),
-                                    ),
+                  return Column(
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 58,
+                            height: 58,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF3F1ED),
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item.productName,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w800,
-                                      color: Color(0xFF171717),
+                            child:
+                                item.imageUrl != null &&
+                                    item.imageUrl!.isNotEmpty
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: Image.network(
+                                      item.imageUrl!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                            return const Icon(
+                                              Icons.shopping_bag_outlined,
+                                              color: Color(0xFFEE7424),
+                                            );
+                                          },
                                     ),
+                                  )
+                                : const Icon(
+                                    Icons.shopping_bag_outlined,
+                                    color: Color(0xFFEE7424),
                                   ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    'Qty: ${item.quantity}',
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: Color(0xFF777777),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'EGP ${item.total.toStringAsFixed(2)}',
+                                  item.productName,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
-                                    fontSize: 13,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w800,
                                     color: Color(0xFF171717),
                                   ),
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 5),
                                 Text(
-                                  'EGP ${item.price.toStringAsFixed(2)} each',
+                                  'Qty: ${item.quantity}',
                                   style: const TextStyle(
-                                    fontSize: 9,
-                                    color: Color(0xFF999999),
+                                    fontSize: 11,
+                                    color: Color(0xFF777777),
                                   ),
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                        if (index != order.items.length - 1)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 14,
-                            ),
-                            child: Divider(height: 1),
                           ),
-                      ],
-                    );
-                  },
-                ),
+                          const SizedBox(width: 8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                'EGP ${item.total.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF171717),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'EGP ${item.price.toStringAsFixed(2)} each',
+                                style: const TextStyle(
+                                  fontSize: 9,
+                                  color: Color(0xFF999999),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      if (index != order.items.length - 1)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 14),
+                          child: Divider(height: 1),
+                        ),
+                    ],
+                  );
+                }),
               ),
             ),
 
@@ -537,7 +503,6 @@ class OrderDetailsScreen extends ConsumerWidget {
             // =====================================================
             // PAYMENT
             // =====================================================
-
             const Text(
               'Payment',
               style: TextStyle(
@@ -559,16 +524,13 @@ class OrderDetailsScreen extends ConsumerWidget {
               child: _InfoRow(
                 icon: Icons.payments_outlined,
                 title: 'Payment method',
-                value: _paymentText(
-                  order.paymentMethod,
-                ),
+                value: _paymentText(order.paymentMethod),
               ),
             ),
 
             // =====================================================
             // ORDER NOTES
             // =====================================================
-
             if (order.orderNote != null &&
                 order.orderNote!.trim().isNotEmpty) ...[
               const SizedBox(height: 24),
@@ -591,10 +553,7 @@ class OrderDetailsScreen extends ConsumerWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(
-                      Icons.notes_rounded,
-                      color: Color(0xFFEE7424),
-                    ),
+                    const Icon(Icons.notes_rounded, color: Color(0xFFEE7424)),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -616,7 +575,6 @@ class OrderDetailsScreen extends ConsumerWidget {
             // =====================================================
             // ORDER SUMMARY
             // =====================================================
-
             const Text(
               'Order summary',
               style: TextStyle(
@@ -655,9 +613,7 @@ class OrderDetailsScreen extends ConsumerWidget {
                     value: 'EGP ${order.deliveryFee.toStringAsFixed(2)}',
                   ),
                   const Padding(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 16,
-                    ),
+                    padding: EdgeInsets.symmetric(vertical: 16),
                     child: Divider(height: 1),
                   ),
                   _SummaryRow(
@@ -673,7 +629,8 @@ class OrderDetailsScreen extends ConsumerWidget {
           ],
         ),
       ),
-      bottomNavigationBar: order.status == OrderStatus.placed ||
+      bottomNavigationBar:
+          order.status == OrderStatus.placed ||
               order.status == OrderStatus.scheduled
           ? SafeArea(
               child: Padding(
@@ -718,7 +675,16 @@ class OrderDetailsScreen extends ConsumerWidget {
       ),
     );
     if (reason == null || !context.mounted) return;
-    ref.read(ordersProvider.notifier).cancelOrder(order.id, reason);
+    try {
+      await ref.read(ordersProvider.notifier).cancelOrder(order.id, reason);
+    } on OrderSubmissionException catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+      return;
+    }
+    if (!context.mounted) return;
     Navigator.of(context).pop();
   }
 
@@ -726,10 +692,7 @@ class OrderDetailsScreen extends ConsumerWidget {
   // ORDER JOURNEY LOGIC
   // =====================================================
 
-  static bool _isStepCompleted(
-    OrderStatus current,
-    OrderStatus step,
-  ) {
+  static bool _isStepCompleted(OrderStatus current, OrderStatus step) {
     if (current == OrderStatus.cancelled) {
       return false;
     }
@@ -737,9 +700,7 @@ class OrderDetailsScreen extends ConsumerWidget {
     return _statusIndex(current) >= _statusIndex(step);
   }
 
-  static int _statusIndex(
-    OrderStatus status,
-  ) {
+  static int _statusIndex(OrderStatus status) {
     switch (status) {
       case OrderStatus.placed:
         return 0;
@@ -768,15 +729,10 @@ class OrderDetailsScreen extends ConsumerWidget {
   // TOTAL ITEMS
   // =====================================================
 
-  static int _totalItems(
-    CustomerOrder order,
-  ) {
-    return order.items.fold(
-      0,
-      (total, item) {
-        return total + item.quantity;
-      },
-    );
+  static int _totalItems(CustomerOrder order) {
+    return order.items.fold(0, (total, item) {
+      return total + item.quantity;
+    });
   }
 
   static String _substitutionLabel(String preference) {
@@ -794,36 +750,23 @@ class OrderDetailsScreen extends ConsumerWidget {
   // ADDRESS
   // =====================================================
 
-  static String _addressText(
-    CustomerOrder order,
-  ) {
-    final details = <String>[
-      order.addressLabel,
-      order.addressLine,
-    ];
+  static String _addressText(CustomerOrder order) {
+    final details = <String>[order.addressLabel, order.addressLine];
 
     if (order.building != null && order.building!.isNotEmpty) {
-      details.add(
-        'Building ${order.building}',
-      );
+      details.add('Building ${order.building}');
     }
 
     if (order.floor != null && order.floor!.isNotEmpty) {
-      details.add(
-        'Floor ${order.floor}',
-      );
+      details.add('Floor ${order.floor}');
     }
 
     if (order.apartment != null && order.apartment!.isNotEmpty) {
-      details.add(
-        'Apartment ${order.apartment}',
-      );
+      details.add('Apartment ${order.apartment}');
     }
 
     if (order.landmark != null && order.landmark!.isNotEmpty) {
-      details.add(
-        'Landmark: ${order.landmark}',
-      );
+      details.add('Landmark: ${order.landmark}');
     }
 
     return details.join('\n');
@@ -833,46 +776,26 @@ class OrderDetailsScreen extends ConsumerWidget {
   // DELIVERY
   // =====================================================
 
-  static String _deliveryText(
-    CustomerOrder order,
-  ) {
+  static String _deliveryText(CustomerOrder order) {
     return '${_dateText(order.deliveryStart)} • '
         '${_timeText(order.deliveryStart)} – '
         '${_timeText(order.deliveryEnd)}';
   }
 
-  static String _dateText(
-    DateTime date,
-  ) {
+  static String _dateText(DateTime date) {
     final now = DateTime.now();
 
-    final today = DateTime(
-      now.year,
-      now.month,
-      now.day,
-    );
+    final today = DateTime(now.year, now.month, now.day);
 
-    final tomorrow = today.add(
-      const Duration(days: 1),
-    );
+    final tomorrow = today.add(const Duration(days: 1));
 
-    final selected = DateTime(
-      date.year,
-      date.month,
-      date.day,
-    );
+    final selected = DateTime(date.year, date.month, date.day);
 
-    if (_sameDate(
-      selected,
-      today,
-    )) {
+    if (_sameDate(selected, today)) {
       return 'Today';
     }
 
-    if (_sameDate(
-      selected,
-      tomorrow,
-    )) {
+    if (_sameDate(selected, tomorrow)) {
       return 'Tomorrow';
     }
 
@@ -880,18 +803,13 @@ class OrderDetailsScreen extends ConsumerWidget {
         '${date.day} ${_monthName(date.month)}';
   }
 
-  static bool _sameDate(
-    DateTime first,
-    DateTime second,
-  ) {
+  static bool _sameDate(DateTime first, DateTime second) {
     return first.year == second.year &&
         first.month == second.month &&
         first.day == second.day;
   }
 
-  static String _timeText(
-    DateTime date,
-  ) {
+  static String _timeText(DateTime date) {
     final period = date.hour >= 12 ? 'PM' : 'AM';
 
     var hour = date.hour % 12;
@@ -907,9 +825,7 @@ class OrderDetailsScreen extends ConsumerWidget {
   // PAYMENT
   // =====================================================
 
-  static String _paymentText(
-    OrderPaymentMethod method,
-  ) {
+  static String _paymentText(OrderPaymentMethod method) {
     switch (method) {
       case OrderPaymentMethod.cash:
         return 'Cash on delivery';
@@ -922,9 +838,7 @@ class OrderDetailsScreen extends ConsumerWidget {
     }
   }
 
-  static String _weekdayName(
-    DateTime date,
-  ) {
+  static String _weekdayName(DateTime date) {
     const names = [
       'Monday',
       'Tuesday',
@@ -938,9 +852,7 @@ class OrderDetailsScreen extends ConsumerWidget {
     return names[date.weekday - 1];
   }
 
-  static String _monthName(
-    int month,
-  ) {
+  static String _monthName(int month) {
     const months = [
       'Jan',
       'Feb',
@@ -963,9 +875,7 @@ class OrderDetailsScreen extends ConsumerWidget {
   // STATUS
   // =====================================================
 
-  static _StatusStyle _getStatusStyle(
-    OrderStatus status,
-  ) {
+  static _StatusStyle _getStatusStyle(OrderStatus status) {
     switch (status) {
       case OrderStatus.placed:
         return const _StatusStyle(
@@ -1063,17 +973,17 @@ class _JourneyStep extends StatelessWidget {
                         color: Colors.white,
                       )
                     : current
-                        ? Center(
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          )
-                        : null,
+                    ? Center(
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      )
+                    : null,
               ),
               if (!isLast)
                 Container(
@@ -1089,16 +999,15 @@ class _JourneyStep extends StatelessWidget {
         const SizedBox(width: 10),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(
-              top: 2,
-            ),
+            padding: const EdgeInsets.only(top: 2),
             child: Text(
               title,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: current ? FontWeight.w800 : FontWeight.w600,
-                color:
-                    active ? const Color(0xFF171717) : const Color(0xFF999999),
+                color: active
+                    ? const Color(0xFF171717)
+                    : const Color(0xFF999999),
               ),
             ),
           ),
@@ -1135,11 +1044,7 @@ class _InfoRow extends StatelessWidget {
             color: const Color(0xFFFFE6D5),
             borderRadius: BorderRadius.circular(13),
           ),
-          child: Icon(
-            icon,
-            size: 21,
-            color: const Color(0xFFEE7424),
-          ),
+          child: Icon(icon, size: 21, color: const Color(0xFFEE7424)),
         ),
         const SizedBox(width: 13),
         Expanded(
@@ -1148,10 +1053,7 @@ class _InfoRow extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: Color(0xFF777777),
-                ),
+                style: const TextStyle(fontSize: 11, color: Color(0xFF777777)),
               ),
               const SizedBox(height: 4),
               Text(
@@ -1209,8 +1111,8 @@ class _SummaryRow extends StatelessWidget {
             color: isDiscount
                 ? const Color(0xFF2E7D32)
                 : isTotal
-                    ? const Color(0xFFEE7424)
-                    : const Color(0xFF171717),
+                ? const Color(0xFFEE7424)
+                : const Color(0xFF171717),
           ),
         ),
       ],

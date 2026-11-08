@@ -2,40 +2,44 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../repositories/coupon_repository.dart';
 
-enum PaymentMethod {
-  cash,
-  card,
-  wallet,
-}
+enum PaymentMethod { cash, card, wallet }
 
-enum SubstitutionPreference {
-  replaceAutomatically,
-  contactMe,
-  removeItem,
-}
+enum SubstitutionPreference { replaceAutomatically, contactMe, removeItem }
 
 class CheckoutState {
   final PaymentMethod paymentMethod;
 
-  final String promoCode;
-  final double discountAmount;
+  final Coupon? coupon;
   final String? promoMessage;
   final SubstitutionPreference substitutionPreference;
   final String deliveryInstruction;
 
   const CheckoutState({
     this.paymentMethod = PaymentMethod.cash,
-    this.promoCode = '',
-    this.discountAmount = 0,
+    this.coupon,
     this.promoMessage,
     this.substitutionPreference = SubstitutionPreference.contactMe,
     this.deliveryInstruction = 'Call on arrival',
   });
 
+  String get promoCode => coupon?.code ?? '';
+
+  double discountFor(double subtotal) => coupon?.discountFor(subtotal) ?? 0;
+
+  /// The cart can change after the code is applied, so the message depends on
+  /// the current subtotal.
+  String? promoMessageFor(double subtotal) {
+    final applied = coupon;
+    if (applied != null && subtotal < applied.minimumOrder) {
+      return 'Minimum order is EGP ${applied.minimumOrder.toStringAsFixed(0)}';
+    }
+    return promoMessage;
+  }
+
   CheckoutState copyWith({
     PaymentMethod? paymentMethod,
-    String? promoCode,
-    double? discountAmount,
+    Coupon? coupon,
+    bool clearCoupon = false,
     String? promoMessage,
     bool clearPromoMessage = false,
     SubstitutionPreference? substitutionPreference,
@@ -43,10 +47,10 @@ class CheckoutState {
   }) {
     return CheckoutState(
       paymentMethod: paymentMethod ?? this.paymentMethod,
-      promoCode: promoCode ?? this.promoCode,
-      discountAmount: discountAmount ?? this.discountAmount,
-      promoMessage:
-          clearPromoMessage ? null : promoMessage ?? this.promoMessage,
+      coupon: clearCoupon ? null : coupon ?? this.coupon,
+      promoMessage: clearPromoMessage
+          ? null
+          : promoMessage ?? this.promoMessage,
       substitutionPreference:
           substitutionPreference ?? this.substitutionPreference,
       deliveryInstruction: deliveryInstruction ?? this.deliveryInstruction,
@@ -55,19 +59,12 @@ class CheckoutState {
 }
 
 class CheckoutViewModel extends StateNotifier<CheckoutState> {
-  CheckoutViewModel(this._coupons)
-      : super(
-          const CheckoutState(),
-        );
+  CheckoutViewModel(this._coupons) : super(const CheckoutState());
 
   final CouponRepository _coupons;
 
-  void selectPaymentMethod(
-    PaymentMethod method,
-  ) {
-    state = state.copyWith(
-      paymentMethod: method,
-    );
+  void selectPaymentMethod(PaymentMethod method) {
+    state = state.copyWith(paymentMethod: method);
   }
 
   void selectSubstitutionPreference(SubstitutionPreference preference) {
@@ -90,8 +87,7 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
 
     if (normalizedCode.isEmpty) {
       state = state.copyWith(
-        promoCode: '',
-        discountAmount: 0,
+        clearCoupon: true,
         promoMessage: 'Please enter a promo code',
       );
 
@@ -100,46 +96,39 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
 
     try {
       final coupon = await _coupons.findByCode(normalizedCode);
-      if (coupon == null || !coupon.active) {
+      if (coupon == null) {
         state = state.copyWith(
-            promoCode: '',
-            discountAmount: 0,
-            promoMessage: 'Invalid or inactive promo code');
+          clearCoupon: true,
+          promoMessage: 'Invalid or inactive promo code',
+        );
         return;
       }
       if (subtotal < coupon.minimumOrder) {
         state = state.copyWith(
-            promoCode: '',
-            discountAmount: 0,
-            promoMessage:
-                'Minimum order is EGP ${coupon.minimumOrder.toStringAsFixed(0)}');
+          clearCoupon: true,
+          promoMessage:
+              'Minimum order is EGP ${coupon.minimumOrder.toStringAsFixed(0)}',
+        );
         return;
       }
-      final discount = coupon.type == 'percentage'
-          ? subtotal * coupon.value / 100
-          : coupon.value;
       state = state.copyWith(
-          promoCode: coupon.code,
-          discountAmount: discount > subtotal ? subtotal : discount,
-          promoMessage: coupon.type == 'percentage'
-              ? '${coupon.value.toStringAsFixed(0)}% discount applied'
-              : 'EGP ${coupon.value.toStringAsFixed(0)} discount applied');
+        coupon: coupon,
+        promoMessage: coupon.type == 'percentage'
+            ? '${coupon.value.toStringAsFixed(0)}% discount applied'
+            : 'EGP ${coupon.value.toStringAsFixed(0)} discount applied',
+      );
       return;
     } catch (_) {
       state = state.copyWith(
-          promoCode: '',
-          discountAmount: 0,
-          promoMessage: 'Could not validate promo code. Try again.');
+        clearCoupon: true,
+        promoMessage: 'Could not validate promo code. Try again.',
+      );
       return;
     }
   }
 
   void removePromoCode() {
-    state = state.copyWith(
-      promoCode: '',
-      discountAmount: 0,
-      clearPromoMessage: true,
-    );
+    state = state.copyWith(clearCoupon: true, clearPromoMessage: true);
   }
 }
 
@@ -149,5 +138,5 @@ final couponRepositoryProvider = Provider<CouponRepository>((ref) {
 
 final checkoutProvider =
     StateNotifierProvider<CheckoutViewModel, CheckoutState>(
-  (ref) => CheckoutViewModel(ref.watch(couponRepositoryProvider)),
-);
+      (ref) => CheckoutViewModel(ref.watch(couponRepositoryProvider)),
+    );

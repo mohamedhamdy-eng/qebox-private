@@ -300,7 +300,7 @@ class _AddAddressScreenState extends ConsumerState<AddAddressScreen> {
                       ),
                       Switch(
                         value: _makeDefault,
-                        activeColor: const Color(
+                        activeThumbColor: const Color(
                           0xFFEE7424,
                         ),
                         onChanged: (value) {

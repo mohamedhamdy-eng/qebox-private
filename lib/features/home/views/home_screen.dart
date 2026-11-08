@@ -314,7 +314,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _bannerArrow(IconData icon, VoidCallback onTap) => Material(
-        color: Colors.black.withOpacity(.35),
+        color: Colors.black.withValues(alpha: .35),
         shape: const CircleBorder(),
         child: InkWell(
           customBorder: const CircleBorder(),

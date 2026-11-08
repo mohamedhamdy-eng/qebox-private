@@ -42,7 +42,7 @@ void main() {
       LocalOrdersRepository(preferences),
       'customer-a',
     );
-    firstViewModel.createOrder(order);
+    await firstViewModel.createOrder(order);
 
     final restoredViewModel = OrdersViewModel(
       LocalOrdersRepository(preferences),
@@ -51,12 +51,16 @@ void main() {
     expect(restoredViewModel.state, hasLength(1));
     expect(restoredViewModel.state.single.id, order.id);
     expect(restoredViewModel.state.single.substitutionPreference, 'removeItem');
-    expect(restoredViewModel.state.single.deliveryInstruction,
-        'Leave at the door');
-    restoredViewModel.cancelOrder(order.id, 'Changed my mind');
+    expect(
+      restoredViewModel.state.single.deliveryInstruction,
+      'Leave at the door',
+    );
+    await restoredViewModel.cancelOrder(order.id, 'Changed my mind');
     expect(restoredViewModel.state.single.status, OrderStatus.cancelled);
     expect(
-        restoredViewModel.state.single.cancellationReason, 'Changed my mind');
+      restoredViewModel.state.single.cancellationReason,
+      'Changed my mind',
+    );
 
     restoredViewModel.switchCustomer('customer-b');
     expect(restoredViewModel.state, isEmpty);
@@ -64,4 +68,65 @@ void main() {
     restoredViewModel.switchCustomer('customer-a');
     expect(restoredViewModel.state.single.id, order.id);
   });
+
+  group('when the store rejects a change', () {
+    final now = DateTime(2026, 9, 13, 12);
+    final order = CustomerOrder(
+      id: 'QB-1',
+      customerId: 'customer-a',
+      items: const [],
+      addressLabel: 'Home',
+      addressLine: 'Alexandria',
+      deliveryStart: now,
+      deliveryEnd: now,
+      paymentMethod: OrderPaymentMethod.cash,
+      subtotal: 0,
+      discount: 0,
+      deliveryFee: 20,
+      total: 20,
+      createdAt: now,
+    );
+
+    test('a rejected order is not saved and the error propagates', () async {
+      final viewModel = OrdersViewModel(_RejectingOrders(), 'customer-a');
+
+      await expectLater(
+        viewModel.createOrder(order),
+        throwsA(isA<OrderSubmissionException>()),
+      );
+      expect(viewModel.state, isEmpty);
+    });
+
+    test('a rejected cancellation keeps the order active', () async {
+      final repository = _RejectingOrders()..saved = [order];
+      final viewModel = OrdersViewModel(repository, 'customer-a');
+
+      await expectLater(
+        viewModel.cancelOrder(order.id, 'Changed my mind'),
+        throwsA(isA<OrderSubmissionException>()),
+      );
+      expect(viewModel.state.single.status, isNot(OrderStatus.cancelled));
+    });
+  });
+}
+
+class _RejectingOrders implements OrdersRepository {
+  List<CustomerOrder> saved = [];
+
+  @override
+  List<CustomerOrder> loadOrders(String customerId) => saved;
+
+  @override
+  void saveOrders(String customerId, List<CustomerOrder> orders) {}
+
+  @override
+  Future<void> publishOrder(CustomerOrder order) async =>
+      throw const OrderSubmissionException('Rejected');
+
+  @override
+  Future<void> publishCancellation(String orderId, String reason) async =>
+      throw const OrderSubmissionException('Rejected');
+
+  @override
+  Stream<List<CustomerOrder>> watchRemoteOrders() => const Stream.empty();
 }
