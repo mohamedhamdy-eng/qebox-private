@@ -57,9 +57,9 @@ class _RecommendedCard extends StatelessWidget {
                     color: Color(0xFFEE7424),
                   ),
                 ),
-                Positioned(
+                PositionedDirectional(
                   top: 6,
-                  right: 6,
+                  end: 6,
                   child: InkWell(
                     onTap: onFavoriteTap,
                     borderRadius: BorderRadius.circular(20),
@@ -109,7 +109,7 @@ class _RecommendedCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 7),
                   Text(
-                    product.name,
+                    product.displayName,
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
@@ -129,7 +129,7 @@ class _RecommendedCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 7),
                   Text(
-                    'EGP ${product.price.toStringAsFixed(0)}',
+                    tr('EGP {0}', [product.price.toStringAsFixed(0)]),
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
@@ -216,9 +216,9 @@ class _RecommendedCard extends StatelessWidget {
         color: const Color(0xFFCCCCCC),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: const Text(
-        'Out',
-        style: TextStyle(
+      child: Text(
+        tr('Out'),
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 10,
           fontWeight: FontWeight.w700,

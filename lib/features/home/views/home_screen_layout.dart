@@ -62,15 +62,18 @@ extension _HomeLayout on _HomeScreenState {
               child: TextField(
                 onChanged: ref.read(homeSearchProvider.notifier).updateQuery,
                 textInputAction: TextInputAction.search,
-                decoration: const InputDecoration(
-                  hintText: 'Search products, brands and categories',
-                  hintStyle: TextStyle(fontSize: 14, color: Color(0xFF999999)),
-                  prefixIcon: Icon(
+                decoration: InputDecoration(
+                  hintText: tr('Search products, brands and categories'),
+                  hintStyle: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF999999),
+                  ),
+                  prefixIcon: const Icon(
                     Icons.search_rounded,
                     color: Color(0xFF171717),
                   ),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 17),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 17),
                 ),
               ),
             ),
@@ -80,7 +83,7 @@ extension _HomeLayout on _HomeScreenState {
             if (searchQuery.isNotEmpty) ...[
               _buildSearchResults(searchResults, cartItems, isFavorite),
             ] else ...[
-              const SectionTitle(title: 'Shop by category'),
+              SectionTitle(title: tr('Shop by category')),
               const SizedBox(height: 18),
               SizedBox(
                 height: 96,
@@ -92,7 +95,7 @@ extension _HomeLayout on _HomeScreenState {
                     final category = catalog.categories[index];
                     return CategoryItem(
                       icon: Icons.local_grocery_store_outlined,
-                      title: category.name,
+                      title: category.displayName,
                       imageUrl: category.imageUrl,
                       onTap: () => _openCategory(category.id),
                     );
@@ -102,7 +105,7 @@ extension _HomeLayout on _HomeScreenState {
               const SizedBox(height: 34),
 
               if (catalog.bundles.isNotEmpty) ...[
-                const SectionTitle(title: 'Value bundles'),
+                SectionTitle(title: tr('Value bundles')),
                 const SizedBox(height: 14),
                 SizedBox(
                   height: 144,
@@ -161,7 +164,10 @@ extension _HomeLayout on _HomeScreenState {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      '${bundle.productIds.length} products · EGP ${bundle.price.toStringAsFixed(2)}',
+                                      tr('{0} products · EGP {1}', [
+                                        bundle.productIds.length,
+                                        bundle.price.toStringAsFixed(2),
+                                      ]),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
@@ -184,7 +190,7 @@ extension _HomeLayout on _HomeScreenState {
                                           Icons.add_shopping_cart_outlined,
                                           size: 18,
                                         ),
-                                        label: const Text('Add bundle'),
+                                        label: Text(tr('Add bundle')),
                                       ),
                                     ),
                                   ],
@@ -223,29 +229,29 @@ extension _HomeLayout on _HomeScreenState {
     bool Function(Product product) isFavorite,
   ) {
     if (products.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 48),
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 48),
         child: Center(
           child: Column(
             children: [
-              Icon(
+              const Icon(
                 Icons.search_off_rounded,
                 size: 64,
                 color: Color(0xFFBBBBBB),
               ),
-              SizedBox(height: 14),
+              const SizedBox(height: 14),
               Text(
-                'No products found',
-                style: TextStyle(
+                tr('No products found'),
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF171717),
                 ),
               ),
-              SizedBox(height: 6),
+              const SizedBox(height: 6),
               Text(
-                'Try another product or category name.',
-                style: TextStyle(fontSize: 13, color: Color(0xFF777777)),
+                tr('Try another product or category name.'),
+                style: const TextStyle(fontSize: 13, color: Color(0xFF777777)),
               ),
             ],
           ),
@@ -256,7 +262,7 @@ extension _HomeLayout on _HomeScreenState {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionTitle(title: '${products.length} search results'),
+        SectionTitle(title: tr('{0} search results', [products.length])),
         const SizedBox(height: 16),
         ...products.map((product) {
           final quantity = _quantityForProduct(product, cartItems);
@@ -265,7 +271,7 @@ extension _HomeLayout on _HomeScreenState {
             child: _RecommendedCard(
               product: product,
               onTap: () => _openProductDetails(product),
-              badge: 'SEARCH RESULT',
+              badge: tr('SEARCH RESULT'),
               quantity: quantity,
               isFavorite: isFavorite(product),
               onFavoriteTap: () => _handleFavoriteTap(product),
@@ -285,8 +291,8 @@ extension _HomeLayout on _HomeScreenState {
       children: [
         Icon(icon),
         if (count > 0)
-          Positioned(
-            right: -8,
+          PositionedDirectional(
+            end: -8,
             top: -7,
             child: Container(
               constraints: const BoxConstraints(minWidth: 17, minHeight: 17),
@@ -346,15 +352,15 @@ extension _HomeLayout on _HomeScreenState {
         unselectedFontSize: 11,
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
         items: [
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home_rounded),
-            label: 'Home',
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.home_outlined),
+            activeIcon: const Icon(Icons.home_rounded),
+            label: (AppLanguage.isArabic ? 'الرئيسية' : 'Home'),
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.grid_view_outlined),
-            activeIcon: Icon(Icons.grid_view_rounded),
-            label: 'Categories',
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.grid_view_outlined),
+            activeIcon: const Icon(Icons.grid_view_rounded),
+            label: tr('Categories'),
           ),
           BottomNavigationBarItem(
             icon: _buildCartIcon(
@@ -365,17 +371,17 @@ extension _HomeLayout on _HomeScreenState {
               icon: Icons.shopping_cart_rounded,
               count: cartCount,
             ),
-            label: 'Cart',
+            label: tr('Cart'),
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long_outlined),
-            activeIcon: Icon(Icons.receipt_long_rounded),
-            label: 'Orders',
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.receipt_long_outlined),
+            activeIcon: const Icon(Icons.receipt_long_rounded),
+            label: tr('Orders'),
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Account',
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.person_outline),
+            activeIcon: const Icon(Icons.person),
+            label: tr('Account'),
           ),
         ],
       ),

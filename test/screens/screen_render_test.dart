@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:qebox_private/core/l10n/app_language.dart';
 import 'package:qebox_private/features/account/models/customer.dart';
 import 'package:qebox_private/features/account/repositories/customer_repository.dart';
 import 'package:qebox_private/features/account/repositories/phone_auth_repository.dart';
@@ -162,6 +164,7 @@ Future<ProviderContainer> _container({bool signedIn = true}) async {
   final preferences = await SharedPreferences.getInstance();
   final container = ProviderContainer(
     overrides: [
+      languageProvider.overrideWith((ref) => LanguageViewModel(preferences)),
       customerProvider.overrideWith(
         (ref) => CustomerViewModel(LocalCustomerRepository(preferences)),
       ),
@@ -227,16 +230,26 @@ Future<void> _render(
   Widget screen, {
   bool signedIn = true,
   ProviderContainer? existing,
+  Locale? locale,
 }) async {
   tester.view.physicalSize = const Size(1170, 2532);
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
   final container = existing ?? await _container(signedIn: signedIn);
   addTearDown(container.dispose);
+  if (locale != null) container.read(languageProvider.notifier).select(locale);
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
-      child: MaterialApp(home: screen),
+      child: Consumer(
+        builder: (context, ref, _) => MaterialApp(
+          locale: ref.watch(languageProvider) ?? const Locale('en'),
+          supportedLocales: supportedAppLocales,
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          builder: (context, child) => LanguageScope(child: child!),
+          home: screen,
+        ),
+      ),
     ),
   );
   await tester.pump();
@@ -292,6 +305,82 @@ void main() {
       await _finish(tester);
     });
   }
+
+  group('in Arabic', () {
+    tearDown(() => AppLanguage.isArabic = false);
+
+    final arabicScreens = <String, (Widget, String, bool)>{
+      'home': (const HomeScreen(), 'منتجات شائعة', true),
+      'categories': (const CategoriesScreen(), 'الأقسام', true),
+      'cart': (const CartScreen(), 'متابعة لإتمام الطلب', true),
+      'checkout': (const CheckoutScreen(), 'إتمام الطلب', true),
+      'delivery schedule': (
+        const DeliveryScheduleScreen(),
+        'اختر وقت التوصيل',
+        true,
+      ),
+      'orders': (const OrdersScreen(), 'الطلبات الحالية', true),
+      'order details': (
+        OrderDetailsScreen(order: _order),
+        'تفاصيل الطلب',
+        true,
+      ),
+      'order confirmed': (
+        OrderConfirmedScreen(order: _order),
+        'تم تأكيد الطلب!',
+        true,
+      ),
+      'account signed in': (const AccountScreen(), 'حسابي', true),
+      'account guest': (const AccountScreen(), 'مرحبًا بك في Qebox', false),
+      'addresses': (const AddressSelectionScreen(), 'عنوان التوصيل', true),
+      'add address': (const AddAddressScreen(), 'إضافة عنوان', true),
+      'favorites': (const FavoritesScreen(), 'مفضلاتي', true),
+      'product details': (
+        const ProductDetailsScreen(product: _milk),
+        'لبن طازج',
+        true,
+      ),
+      'rewards': (const RewardsScreen(), 'مكافآت Q', true),
+      'onboarding': (const OnboardingScreen(), 'توصيل سريع', true),
+      'q bot': (const QBotScreen(), 'تجريبي', true),
+    };
+
+    for (final MapEntry(key: name, value: (screen, expected, signedIn))
+        in arabicScreens.entries) {
+      testWidgets('$name renders right to left', (tester) async {
+        await _render(
+          tester,
+          screen,
+          signedIn: signedIn,
+          locale: const Locale('ar'),
+        );
+
+        expect(find.text(expected), findsWidgets);
+        expect(
+          Directionality.of(tester.element(find.byWidget(screen))),
+          TextDirection.rtl,
+        );
+        await _finish(tester);
+      });
+    }
+
+    testWidgets('changing language updates a screen that is already open', (
+      tester,
+    ) async {
+      final container = await _container();
+      await _render(tester, const AccountScreen(), existing: container);
+      expect(find.text('My Account'), findsOneWidget);
+
+      container.read(languageProvider.notifier).select(const Locale('ar'));
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.text('حسابي'), findsOneWidget);
+      expect(find.text('My Account'), findsNothing);
+      await _finish(tester);
+    });
+  });
 
   testWidgets('cart shows the empty state', (tester) async {
     final container = await _container();

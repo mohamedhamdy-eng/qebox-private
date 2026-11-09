@@ -2,68 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../viewmodels/delivery_schedule_view_model.dart';
+import '../../../core/l10n/app_language.dart';
 
 class DeliveryScheduleScreen extends ConsumerWidget {
-  const DeliveryScheduleScreen({
-    super.key,
-  });
+  const DeliveryScheduleScreen({super.key});
 
   static const List<DeliveryTimeSlot> _allSlots = [
-    DeliveryTimeSlot(
-      id: '10_12',
-      startHour: 10,
-      endHour: 12,
-    ),
-    DeliveryTimeSlot(
-      id: '12_14',
-      startHour: 12,
-      endHour: 14,
-    ),
-    DeliveryTimeSlot(
-      id: '14_16',
-      startHour: 14,
-      endHour: 16,
-    ),
-    DeliveryTimeSlot(
-      id: '16_18',
-      startHour: 16,
-      endHour: 18,
-    ),
-    DeliveryTimeSlot(
-      id: '18_20',
-      startHour: 18,
-      endHour: 20,
-    ),
-    DeliveryTimeSlot(
-      id: '20_22',
-      startHour: 20,
-      endHour: 22,
-    ),
+    DeliveryTimeSlot(id: '10_12', startHour: 10, endHour: 12),
+    DeliveryTimeSlot(id: '12_14', startHour: 12, endHour: 14),
+    DeliveryTimeSlot(id: '14_16', startHour: 14, endHour: 16),
+    DeliveryTimeSlot(id: '16_18', startHour: 16, endHour: 18),
+    DeliveryTimeSlot(id: '18_20', startHour: 18, endHour: 20),
+    DeliveryTimeSlot(id: '20_22', startHour: 20, endHour: 22),
   ];
 
   @override
-  Widget build(
-    BuildContext context,
-    WidgetRef ref,
-  ) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final scheduleState = ref.watch(deliveryScheduleProvider);
 
     final now = DateTime.now();
 
-    final availableDays = List.generate(
-      3,
-      (index) {
-        final date = now.add(
-          Duration(days: index),
-        );
+    final availableDays = List.generate(3, (index) {
+      final date = now.add(Duration(days: index));
 
-        return DateTime(
-          date.year,
-          date.month,
-          date.day,
-        );
-      },
-    );
+      return DateTime(date.year, date.month, date.day);
+    });
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9F7F3),
@@ -72,9 +35,9 @@ class DeliveryScheduleScreen extends ConsumerWidget {
         backgroundColor: const Color(0xFFF9F7F3),
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          'Delivery time',
-          style: TextStyle(
+        title: Text(
+          tr('Delivery time'),
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w800,
             color: Color(0xFF171717),
@@ -84,19 +47,13 @@ class DeliveryScheduleScreen extends ConsumerWidget {
 
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            20,
-            10,
-            20,
-            120,
-          ),
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 120),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // =========================================
               // INTRO
               // =========================================
-
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(18),
@@ -104,31 +61,33 @@ class DeliveryScheduleScreen extends ConsumerWidget {
                   color: const Color(0xFFFFE6D5),
                   borderRadius: BorderRadius.circular(22),
                 ),
-                child: const Row(
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.schedule_rounded,
                       color: Color(0xFFEE7424),
                       size: 28,
                     ),
-                    SizedBox(width: 14),
+                    const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Choose your delivery time',
-                            style: TextStyle(
+                            tr('Choose your delivery time'),
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF171717),
                             ),
                           ),
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
                           Text(
-                            'Select an available delivery slot for today or up to 3 days ahead.',
-                            style: TextStyle(
+                            tr(
+                              'Select an available delivery slot for today or up to 3 days ahead.',
+                            ),
+                            style: const TextStyle(
                               fontSize: 12,
                               height: 1.4,
                               color: Color(0xFF777777),
@@ -146,10 +105,9 @@ class DeliveryScheduleScreen extends ConsumerWidget {
               // =========================================
               // DAYS
               // =========================================
-
-              const Text(
-                'Choose a day',
-                style: TextStyle(
+              Text(
+                tr('Choose a day'),
+                style: const TextStyle(
                   fontSize: 19,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF171717),
@@ -163,18 +121,10 @@ class DeliveryScheduleScreen extends ConsumerWidget {
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: availableDays.length,
-                  separatorBuilder: (
-                    context,
-                    index,
-                  ) {
-                    return const SizedBox(
-                      width: 10,
-                    );
+                  separatorBuilder: (context, index) {
+                    return const SizedBox(width: 10);
                   },
-                  itemBuilder: (
-                    context,
-                    index,
-                  ) {
+                  itemBuilder: (context, index) {
                     final date = availableDays[index];
 
                     final selected = _isSameDay(
@@ -184,19 +134,15 @@ class DeliveryScheduleScreen extends ConsumerWidget {
 
                     return _DayCard(
                       title: index == 0
-                          ? 'Today'
+                          ? tr('Today')
                           : index == 1
-                              ? 'Tomorrow'
-                              : _weekdayName(
-                                  date,
-                                ),
+                          ? tr('Tomorrow')
+                          : _weekdayName(date),
                       date: '${date.day} ${_monthName(date.month)}',
                       selected: selected,
                       onTap: () {
                         ref
-                            .read(
-                              deliveryScheduleProvider.notifier,
-                            )
+                            .read(deliveryScheduleProvider.notifier)
                             .selectDate(date);
                       },
                     );
@@ -209,10 +155,9 @@ class DeliveryScheduleScreen extends ConsumerWidget {
               // =========================================
               // TIME
               // =========================================
-
-              const Text(
-                'Available times',
-                style: TextStyle(
+              Text(
+                tr('Available times'),
+                style: const TextStyle(
                   fontSize: 19,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF171717),
@@ -221,12 +166,9 @@ class DeliveryScheduleScreen extends ConsumerWidget {
 
               const SizedBox(height: 6),
 
-              const Text(
-                'Choose the time window that works best for you.',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF777777),
-                ),
+              Text(
+                tr('Choose the time window that works best for you.'),
+                style: const TextStyle(fontSize: 12, color: Color(0xFF777777)),
               ),
 
               const SizedBox(height: 16),
@@ -246,7 +188,6 @@ class DeliveryScheduleScreen extends ConsumerWidget {
                 // =========================================
                 // SELECTED SLOT SUMMARY
                 // =========================================
-
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(18),
@@ -273,18 +214,16 @@ class DeliveryScheduleScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Selected delivery',
-                              style: TextStyle(
+                            Text(
+                              tr('Selected delivery'),
+                              style: const TextStyle(
                                 fontSize: 12,
                                 color: Color(0xFF777777),
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              _selectedDeliveryText(
-                                scheduleState,
-                              ),
+                              _selectedDeliveryText(scheduleState),
                               style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w800,
@@ -306,15 +245,9 @@ class DeliveryScheduleScreen extends ConsumerWidget {
       // =========================================
       // CONFIRM BUTTON
       // =========================================
-
       bottomNavigationBar: SafeArea(
         child: Container(
-          padding: const EdgeInsets.fromLTRB(
-            20,
-            14,
-            20,
-            18,
-          ),
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
           decoration: const BoxDecoration(
             color: Colors.white,
             boxShadow: [
@@ -342,9 +275,9 @@ class DeliveryScheduleScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(28),
                 ),
               ),
-              child: const Text(
-                'Confirm delivery time',
-                style: TextStyle(
+              child: Text(
+                tr('Confirm delivery time'),
+                style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
                 ),
@@ -363,35 +296,26 @@ class DeliveryScheduleScreen extends ConsumerWidget {
   }) {
     final selectedDate = scheduleState.selectedDate!;
 
-    final isToday = _isSameDay(
-      selectedDate,
-      now,
-    );
+    final isToday = _isSameDay(selectedDate, now);
 
-    final availableSlots = _allSlots.where(
-      (slot) {
-        if (!isToday) {
-          return true;
-        }
+    final availableSlots = _allSlots.where((slot) {
+      if (!isToday) {
+        return true;
+      }
 
-        final slotStart = DateTime(
-          selectedDate.year,
-          selectedDate.month,
-          selectedDate.day,
-          slot.startHour,
-        );
+      final slotStart = DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
+        slot.startHour,
+      );
 
-        // Temporary operational buffer.
-        // Later this will come from Dashboard.
-        final earliestAllowed = now.add(
-          const Duration(hours: 1),
-        );
+      // Temporary operational buffer.
+      // Later this will come from Dashboard.
+      final earliestAllowed = now.add(const Duration(hours: 1));
 
-        return slotStart.isAfter(
-          earliestAllowed,
-        );
-      },
-    ).toList();
+      return slotStart.isAfter(earliestAllowed);
+    }).toList();
 
     if (availableSlots.isEmpty) {
       return Container(
@@ -401,18 +325,17 @@ class DeliveryScheduleScreen extends ConsumerWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(22),
         ),
-        child: const Row(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              Icons.schedule_outlined,
-              color: Color(0xFFEE7424),
-            ),
-            SizedBox(width: 12),
+            const Icon(Icons.schedule_outlined, color: Color(0xFFEE7424)),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Today\'s delivery slots are finished. Please choose tomorrow or the next available day.',
-                style: TextStyle(
+                tr(
+                  'Today\'s delivery slots are finished. Please choose tomorrow or the next available day.',
+                ),
+                style: const TextStyle(
                   fontSize: 13,
                   height: 1.4,
                   color: Color(0xFF777777),
@@ -427,90 +350,68 @@ class DeliveryScheduleScreen extends ConsumerWidget {
     return Wrap(
       spacing: 10,
       runSpacing: 10,
-      children: availableSlots.map(
-        (slot) {
-          final selected = scheduleState.selectedTimeSlot?.id == slot.id;
+      children: availableSlots.map((slot) {
+        final selected = scheduleState.selectedTimeSlot?.id == slot.id;
 
-          return InkWell(
-            onTap: () {
-              ref
-                  .read(
-                    deliveryScheduleProvider.notifier,
-                  )
-                  .selectTimeSlot(slot);
-            },
-            borderRadius: BorderRadius.circular(18),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 18,
-                vertical: 15,
-              ),
-              decoration: BoxDecoration(
-                color: selected ? const Color(0xFFFFE6D5) : Colors.white,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color:
-                      selected ? const Color(0xFFEE7424) : Colors.transparent,
-                  width: 1.5,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.access_time_rounded,
-                    size: 17,
-                    color: selected
-                        ? const Color(
-                            0xFFEE7424,
-                          )
-                        : const Color(
-                            0xFF777777,
-                          ),
-                  ),
-                  const SizedBox(width: 7),
-                  Text(
-                    slot.label,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: selected
-                          ? const Color(
-                              0xFFEE7424,
-                            )
-                          : const Color(
-                              0xFF171717,
-                            ),
-                    ),
-                  ),
-                ],
+        return InkWell(
+          onTap: () {
+            ref.read(deliveryScheduleProvider.notifier).selectTimeSlot(slot);
+          },
+          borderRadius: BorderRadius.circular(18),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+            decoration: BoxDecoration(
+              color: selected ? const Color(0xFFFFE6D5) : Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: selected ? const Color(0xFFEE7424) : Colors.transparent,
+                width: 1.5,
               ),
             ),
-          );
-        },
-      ).toList(),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.access_time_rounded,
+                  size: 17,
+                  color: selected
+                      ? const Color(0xFFEE7424)
+                      : const Color(0xFF777777),
+                ),
+                const SizedBox(width: 7),
+                Text(
+                  slot.label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: selected
+                        ? const Color(0xFFEE7424)
+                        : const Color(0xFF171717),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 
-  static String _selectedDeliveryText(
-    DeliveryScheduleState state,
-  ) {
+  static String _selectedDeliveryText(DeliveryScheduleState state) {
     if (!state.isComplete) {
       return '';
     }
 
     final date = state.selectedDate!;
 
-    final dateText = '${_weekdayName(date)}, '
+    final dateText =
+        '${_weekdayName(date)}, '
         '${date.day} ${_monthName(date.month)}';
 
     return '$dateText • ${state.selectedTimeSlot!.label}';
   }
 
-  static bool _isSameDay(
-    DateTime? first,
-    DateTime second,
-  ) {
+  static bool _isSameDay(DateTime? first, DateTime second) {
     if (first == null) {
       return false;
     }
@@ -520,9 +421,7 @@ class DeliveryScheduleScreen extends ConsumerWidget {
         first.day == second.day;
   }
 
-  static String _weekdayName(
-    DateTime date,
-  ) {
+  static String _weekdayName(DateTime date) {
     const names = [
       'Monday',
       'Tuesday',
@@ -533,12 +432,10 @@ class DeliveryScheduleScreen extends ConsumerWidget {
       'Sunday',
     ];
 
-    return names[date.weekday - 1];
+    return tr(names[date.weekday - 1]);
   }
 
-  static String _monthName(
-    int month,
-  ) {
+  static String _monthName(int month) {
     const months = [
       'Jan',
       'Feb',
@@ -554,7 +451,7 @@ class DeliveryScheduleScreen extends ConsumerWidget {
       'Dec',
     ];
 
-    return months[month - 1];
+    return tr(months[month - 1]);
   }
 }
 
@@ -564,9 +461,7 @@ class DeliveryScheduleScreen extends ConsumerWidget {
 
 class _ChooseDayFirst extends StatelessWidget {
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -574,20 +469,14 @@ class _ChooseDayFirst extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(
-            Icons.calendar_month_outlined,
-            color: Color(0xFF999999),
-          ),
-          SizedBox(width: 12),
+          const Icon(Icons.calendar_month_outlined, color: Color(0xFF999999)),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Choose a delivery day first.',
-              style: TextStyle(
-                fontSize: 13,
-                color: Color(0xFF777777),
-              ),
+              tr('Choose a delivery day first.'),
+              style: const TextStyle(fontSize: 13, color: Color(0xFF777777)),
             ),
           ),
         ],
@@ -614,9 +503,7 @@ class _DayCard extends StatelessWidget {
   });
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
@@ -636,31 +523,27 @@ class _DayCard extends StatelessWidget {
           children: [
             Text(
               title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 color: selected
-                    ? const Color(
-                        0xFFEE7424,
-                      )
-                    : const Color(
-                        0xFF777777,
-                      ),
+                    ? const Color(0xFFEE7424)
+                    : const Color(0xFF777777),
               ),
             ),
             const SizedBox(height: 6),
             Text(
               date,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
                 color: selected
-                    ? const Color(
-                        0xFFEE7424,
-                      )
-                    : const Color(
-                        0xFF171717,
-                      ),
+                    ? const Color(0xFFEE7424)
+                    : const Color(0xFF171717),
               ),
             ),
           ],

@@ -1,3 +1,5 @@
+import '../../../core/l10n/app_language.dart';
+
 class Product {
   final String id;
   final String name;
@@ -41,6 +43,9 @@ class Product {
   });
 
   bool get inStock => stockQuantity > 0;
+
+  String get displayName =>
+      AppLanguage.isArabic && (nameAr?.isNotEmpty ?? false) ? nameAr! : name;
 
   bool get hasDiscount {
     return oldPrice != null && oldPrice! > price;

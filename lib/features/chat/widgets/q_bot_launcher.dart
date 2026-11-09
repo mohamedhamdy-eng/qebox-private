@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../views/q_bot_screen.dart';
+import '../../../core/l10n/app_language.dart';
 
 class QBotLauncher extends StatefulWidget {
   const QBotLauncher({
@@ -51,15 +52,17 @@ class _QBotLauncherState extends State<QBotLauncher> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final maxX = (constraints.maxWidth - _bubbleSize - 8)
-            .clamp(8.0, double.infinity);
-        final maxY = (constraints.maxHeight - _bubbleSize - 16)
-            .clamp(8.0, double.infinity);
+        final maxX = (constraints.maxWidth - _bubbleSize - 8).clamp(
+          8.0,
+          double.infinity,
+        );
+        final maxY = (constraints.maxHeight - _bubbleSize - 16).clamp(
+          8.0,
+          double.infinity,
+        );
 
-        Offset constrained(Offset value) => Offset(
-              value.dx.clamp(8.0, maxX),
-              value.dy.clamp(8.0, maxY),
-            );
+        Offset constrained(Offset value) =>
+            Offset(value.dx.clamp(8.0, maxX), value.dy.clamp(8.0, maxY));
 
         return Stack(
           children: [
@@ -113,7 +116,8 @@ class _QBotLauncherState extends State<QBotLauncher> {
                       },
                       onPanEnd: (_) {
                         final latest = constrained(_position.value ?? position);
-                        final bubbleCenter = latest +
+                        final bubbleCenter =
+                            latest +
                             const Offset(_bubbleSize / 2, _bubbleSize / 2);
                         final removeCenter = Offset(
                           constraints.maxWidth / 2,
@@ -141,7 +145,7 @@ class _QBotLauncherState extends State<QBotLauncher> {
                 },
                 child: Semantics(
                   button: true,
-                  label: 'Open Q Bot AI shopping assistant',
+                  label: tr('Open Q Bot AI shopping assistant'),
                   child: const Material(
                     elevation: 10,
                     color: Color(0xFFEE7424),

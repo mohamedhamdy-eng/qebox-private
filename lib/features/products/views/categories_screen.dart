@@ -10,10 +10,14 @@ import '../models/product.dart';
 import '../viewmodels/catalog_view_model.dart';
 import '../widgets/product_card.dart';
 import 'product_details_screen.dart';
+import '../../../core/l10n/app_language.dart';
 
 class CategoriesScreen extends ConsumerStatefulWidget {
-  const CategoriesScreen(
-      {this.initialCategory, this.showBackButton = false, super.key});
+  const CategoriesScreen({
+    this.initialCategory,
+    this.showBackButton = false,
+    super.key,
+  });
   final String? initialCategory;
   final bool showBackButton;
 
@@ -33,8 +37,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     final products = _selectedCategory == null
         ? catalog.products
         : catalog.products
-            .where((item) => item.categoryId == _selectedCategory)
-            .toList();
+              .where((item) => item.categoryId == _selectedCategory)
+              .toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9F7F3),
@@ -42,8 +46,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         automaticallyImplyLeading: widget.showBackButton,
         backgroundColor: const Color(0xFFF9F7F3),
         surfaceTintColor: Colors.transparent,
-        title: const Text('Categories',
-            style: TextStyle(fontWeight: FontWeight.w800)),
+        title: Text(
+          tr('Categories'),
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
       ),
       body: Column(
         children: [
@@ -53,9 +59,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
               children: [
-                _chip(null, 'All'),
-                ...catalog.categories
-                    .map((category) => _chip(category.id, category.name)),
+                _chip(null, tr('All')),
+                ...catalog.categories.map(
+                  (category) => _chip(category.id, category.displayName),
+                ),
               ],
             ),
           ),
@@ -63,45 +70,47 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             child: catalog.loading
                 ? const Center(child: CircularProgressIndicator())
                 : products.isEmpty
-                    ? const Center(child: Text('No products available yet.'))
-                    : LayoutBuilder(builder: (context, constraints) {
-                        final compact = constraints.maxWidth < 380;
-                        return GridView.builder(
-                          padding: EdgeInsets.all(compact ? 12 : 20),
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: compact ? .45 : .55,
-                            crossAxisSpacing: compact ? 10 : 14,
-                            mainAxisSpacing: compact ? 10 : 14,
-                          ),
-                          itemCount: products.length,
-                          itemBuilder: (context, index) {
-                            final product = products[index];
-                            final quantity = _quantity(product, cart);
-                            return ProductCard(
-                              product: product,
-                              quantity: quantity,
-                              isFavorite: customer != null &&
-                                  favorites.isFavorite(
-                                    customerId: customer.id,
-                                    productId: product.id,
-                                  ),
-                              onTap: () => _openDetails(product),
-                              onFavoriteTap: () => _toggleFavorite(product),
-                              onAddToCart: () => ref
-                                  .read(cartProvider.notifier)
-                                  .addProduct(product),
-                              onIncrease: () => ref
-                                  .read(cartProvider.notifier)
-                                  .increaseQuantity(product.id),
-                              onDecrease: () => ref
-                                  .read(cartProvider.notifier)
-                                  .decreaseQuantity(product.id),
-                            );
-                          },
-                        );
-                      }),
+                ? Center(child: Text(tr('No products available yet.')))
+                : LayoutBuilder(
+                    builder: (context, constraints) {
+                      final compact = constraints.maxWidth < 380;
+                      return GridView.builder(
+                        padding: EdgeInsets.all(compact ? 12 : 20),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: compact ? .45 : .55,
+                          crossAxisSpacing: compact ? 10 : 14,
+                          mainAxisSpacing: compact ? 10 : 14,
+                        ),
+                        itemCount: products.length,
+                        itemBuilder: (context, index) {
+                          final product = products[index];
+                          final quantity = _quantity(product, cart);
+                          return ProductCard(
+                            product: product,
+                            quantity: quantity,
+                            isFavorite:
+                                customer != null &&
+                                favorites.isFavorite(
+                                  customerId: customer.id,
+                                  productId: product.id,
+                                ),
+                            onTap: () => _openDetails(product),
+                            onFavoriteTap: () => _toggleFavorite(product),
+                            onAddToCart: () => ref
+                                .read(cartProvider.notifier)
+                                .addProduct(product),
+                            onIncrease: () => ref
+                                .read(cartProvider.notifier)
+                                .increaseQuantity(product.id),
+                            onDecrease: () => ref
+                                .read(cartProvider.notifier)
+                                .decreaseQuantity(product.id),
+                          );
+                        },
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -109,22 +118,23 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   }
 
   Widget _chip(String? id, String label) => Padding(
-        padding: const EdgeInsets.only(right: 8),
-        child: ChoiceChip(
-          label: Text(label),
-          selected: _selectedCategory == id,
-          onSelected: (_) => setState(() => _selectedCategory = id),
-          selectedColor: const Color(0xFFFFE6D5),
-        ),
-      );
+    padding: const EdgeInsetsDirectional.only(end: 8),
+    child: ChoiceChip(
+      label: Text(label),
+      selected: _selectedCategory == id,
+      onSelected: (_) => setState(() => _selectedCategory = id),
+      selectedColor: const Color(0xFFFFE6D5),
+    ),
+  );
 
   int _quantity(Product product, List<CartItem> cart) => cart
       .where((item) => item.product.id == product.id)
       .fold<int>(0, (total, item) => total + item.quantity);
 
   void _openDetails(Product product) {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => ProductDetailsScreen(product: product)));
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ProductDetailsScreen(product: product)),
+    );
   }
 
   Future<void> _toggleFavorite(Product product) async {
@@ -132,18 +142,15 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     if (customer == null) {
       final authenticated = await Navigator.of(context).push<bool>(
         MaterialPageRoute(
-          builder: (_) => const AccountScreen(
-            closeAfterAuthentication: true,
-          ),
+          builder: (_) => const AccountScreen(closeAfterAuthentication: true),
         ),
       );
       if (!mounted || authenticated != true) return;
       customer = ref.read(customerProvider).customer;
     }
     if (customer == null) return;
-    ref.read(favoritesProvider.notifier).toggleFavorite(
-          customerId: customer.id,
-          product: product,
-        );
+    ref
+        .read(favoritesProvider.notifier)
+        .toggleFavorite(customerId: customer.id, product: product);
   }
 }

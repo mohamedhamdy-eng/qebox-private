@@ -20,7 +20,13 @@ const MAX_QUANTITY = 999;
 const MAX_SCHEDULE_AHEAD_MS = 60 * 24 * 60 * 60 * 1000;
 
 const invalid = (message) => new HttpsError("invalid-argument", message);
-const rejected = (message) => new HttpsError("failed-precondition", message);
+function rejected(template, args = []) {
+  const message = args.reduce(
+      (text, value, index) => text.replace(`{${index}}`, value),
+      template,
+  );
+  return new HttpsError("failed-precondition", message, {template, args});
+}
 
 function requireCustomer(request, allowAnonymous) {
   const auth = request.auth;
@@ -190,8 +196,8 @@ function buildLines(quantities, bundles, products) {
       quantity > product.maxQuantityPerOrder
     ) {
       throw rejected(
-          `You can order up to ${product.maxQuantityPerOrder} of ` +
-          `${product.name}.`,
+          "You can order up to {0} of {1}.",
+          [product.maxQuantityPerOrder, product.name],
       );
     }
     lines.push({
@@ -212,7 +218,7 @@ function checkStock(required, products) {
       throw rejected("An item in your cart is no longer available.");
     }
     if ((product.data.stockQuantity || 0) < quantity) {
-      throw rejected(`There is not enough stock of ${product.data.name}.`);
+      throw rejected("There is not enough stock of {0}.", [product.data.name]);
     }
   }
 }
@@ -237,7 +243,7 @@ async function readValidCoupon(db, tx, code, uid, subtotal, now) {
   const problem = couponWindowProblem(coupon, now);
   if (problem) throw rejected(problem);
   if (subtotal < toPiastres(coupon.minimumOrder || 0)) {
-    throw rejected(`The minimum order is EGP ${coupon.minimumOrder}.`);
+    throw rejected("The minimum order is EGP {0}.", [coupon.minimumOrder]);
   }
   const redemption = redemptionRef(db, document.id, uid);
   if (coupon.perCustomerLimit != null) {

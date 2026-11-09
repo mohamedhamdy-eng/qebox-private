@@ -9,7 +9,7 @@ extension _CheckoutSections on _CheckoutScreenState {
       // ==================================
       // DELIVERY ADDRESS
       // ==================================
-      const _SectionTitle(title: 'Delivery address'),
+      _SectionTitle(title: tr('Delivery address')),
 
       const SizedBox(height: 14),
 
@@ -37,21 +37,21 @@ extension _CheckoutSections on _CheckoutScreenState {
               const SizedBox(width: 14),
               Expanded(
                 child: selectedAddress == null
-                    ? const Column(
+                    ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Add delivery address',
-                            style: TextStyle(
+                            tr('Add delivery address'),
+                            style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF171717),
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
-                            'Choose where you want your order delivered',
-                            style: TextStyle(
+                            tr('Choose where you want your order delivered'),
+                            style: const TextStyle(
                               fontSize: 12,
                               color: Color(0xFF777777),
                             ),
@@ -65,7 +65,7 @@ extension _CheckoutSections on _CheckoutScreenState {
                             children: [
                               Flexible(
                                 child: Text(
-                                  selectedAddress.label,
+                                  tr(selectedAddress.label),
                                   style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w800,
@@ -84,9 +84,9 @@ extension _CheckoutSections on _CheckoutScreenState {
                                     color: const Color(0xFFFFE6D5),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  child: const Text(
-                                    'DEFAULT',
-                                    style: TextStyle(
+                                  child: Text(
+                                    tr('DEFAULT'),
+                                    style: const TextStyle(
                                       fontSize: 8,
                                       fontWeight: FontWeight.w800,
                                       color: Color(0xFFEE7424),
@@ -137,20 +137,22 @@ extension _CheckoutSections on _CheckoutScreenState {
 
       const SizedBox(height: 28),
 
-      const _SectionTitle(title: 'Order preferences'),
+      _SectionTitle(title: tr('Order preferences')),
       const SizedBox(height: 6),
-      const Text(
-        'Tell us how to handle replacements and delivery.',
-        style: TextStyle(fontSize: 12, color: Color(0xFF777777)),
+      Text(
+        tr('Tell us how to handle replacements and delivery.'),
+        style: const TextStyle(fontSize: 12, color: Color(0xFF777777)),
       ),
       const SizedBox(height: 14),
       _PreferenceDropdown<SubstitutionPreference>(
-        title: 'If an item is out of stock',
+        title: tr('If an item is out of stock'),
         value: checkoutState.substitutionPreference,
-        items: const {
-          SubstitutionPreference.replaceAutomatically: 'Replace automatically',
-          SubstitutionPreference.contactMe: 'Contact me first',
-          SubstitutionPreference.removeItem: 'Remove the item',
+        items: {
+          SubstitutionPreference.replaceAutomatically: tr(
+            'Replace automatically',
+          ),
+          SubstitutionPreference.contactMe: tr('Contact me first'),
+          SubstitutionPreference.removeItem: tr('Remove the item'),
         },
         onChanged: (preference) => ref
             .read(checkoutProvider.notifier)
@@ -158,13 +160,13 @@ extension _CheckoutSections on _CheckoutScreenState {
       ),
       const SizedBox(height: 12),
       _PreferenceDropdown<String>(
-        title: 'Delivery instruction',
+        title: tr('Delivery instruction'),
         value: checkoutState.deliveryInstruction,
-        items: const {
-          'Call on arrival': 'Call on arrival',
-          'Leave at the door': 'Leave at the door',
-          'Leave with doorman': 'Leave with doorman',
-          'Do not ring the bell': 'Do not ring the bell',
+        items: {
+          'Call on arrival': tr('Call on arrival'),
+          'Leave at the door': tr('Leave at the door'),
+          'Leave with doorman': tr('Leave with doorman'),
+          'Do not ring the bell': tr('Do not ring the bell'),
         },
         onChanged: (instruction) => ref
             .read(checkoutProvider.notifier)
@@ -179,13 +181,13 @@ extension _CheckoutSections on _CheckoutScreenState {
       // ==================================
       // DELIVERY TIME
       // ==================================
-      const _SectionTitle(title: 'Delivery time'),
+      _SectionTitle(title: tr('Delivery time')),
 
       const SizedBox(height: 6),
 
-      const Text(
-        'Choose when you want your order delivered.',
-        style: TextStyle(fontSize: 12, color: Color(0xFF777777)),
+      Text(
+        tr('Choose when you want your order delivered.'),
+        style: const TextStyle(fontSize: 12, color: Color(0xFF777777)),
       ),
 
       const SizedBox(height: 14),
@@ -223,9 +225,9 @@ extension _CheckoutSections on _CheckoutScreenState {
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Selected delivery time',
-                            style: TextStyle(
+                          Text(
+                            tr('Selected delivery time'),
+                            style: const TextStyle(
                               fontSize: 11,
                               color: Color(0xFF777777),
                             ),
@@ -250,21 +252,21 @@ extension _CheckoutSections on _CheckoutScreenState {
                           ),
                         ],
                       )
-                    : const Column(
+                    : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Choose delivery time',
-                            style: TextStyle(
+                            tr('Choose delivery time'),
+                            style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF171717),
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
-                            'Today, tomorrow or the next available day',
-                            style: TextStyle(
+                            tr('Today, tomorrow or the next available day'),
+                            style: const TextStyle(
                               fontSize: 12,
                               color: Color(0xFF777777),
                             ),
@@ -292,19 +294,21 @@ extension _CheckoutSections on _CheckoutScreenState {
             color: const Color(0xFFFFF4EC),
             borderRadius: BorderRadius.circular(18),
           ),
-          child: const Row(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
+              const Icon(
                 Icons.info_outline_rounded,
                 color: Color(0xFFEE7424),
                 size: 20,
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Your order will be prepared based on your selected delivery slot. Live tracking will start when your delivery begins.',
-                  style: TextStyle(
+                  tr(
+                    'Your order will be prepared based on your selected delivery slot. Live tracking will start when your delivery begins.',
+                  ),
+                  style: const TextStyle(
                     fontSize: 11,
                     height: 1.4,
                     color: Color(0xFF777777),

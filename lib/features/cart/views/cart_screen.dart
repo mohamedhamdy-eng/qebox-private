@@ -8,6 +8,7 @@ import '../../products/viewmodels/catalog_view_model.dart';
 import '../models/cart_item.dart';
 import '../viewmodels/cart_view_model.dart';
 import '../viewmodels/order_note_view_model.dart';
+import '../../../core/l10n/app_language.dart';
 
 part 'cart_screen_sections.dart';
 part 'cart_screen_widgets.dart';

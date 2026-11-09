@@ -6,7 +6,7 @@ extension _HomeCatalogSections on _HomeScreenState {
       // =====================================================
       // DEALS
       // =====================================================
-      const SectionTitle(title: 'Deals for you'),
+      SectionTitle(title: tr('Deals for you')),
       const SizedBox(height: 16),
 
       if (banners.isNotEmpty) ...[
@@ -123,9 +123,9 @@ extension _HomeCatalogSections on _HomeScreenState {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Text(
-                      'SPECIAL OFFER',
-                      style: TextStyle(
+                    child: Text(
+                      tr('SPECIAL OFFER'),
+                      style: const TextStyle(
                         color: QeboxPalette.green,
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
@@ -133,9 +133,9 @@ extension _HomeCatalogSections on _HomeScreenState {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  const Text(
-                    'Fresh picks,\nbetter prices.',
-                    style: TextStyle(
+                  Text(
+                    tr('Fresh picks,\nbetter prices.'),
+                    style: const TextStyle(
                       fontSize: 25,
                       height: 1.05,
                       fontWeight: FontWeight.w800,
@@ -143,9 +143,9 @@ extension _HomeCatalogSections on _HomeScreenState {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
-                    'Save up to 25%',
-                    style: TextStyle(
+                  Text(
+                    tr('Save up to 25%'),
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: QeboxPalette.orange,
@@ -171,7 +171,7 @@ extension _HomeCatalogSections on _HomeScreenState {
       // =====================================================
       // POPULAR PRODUCTS
       // =====================================================
-      const SectionTitle(title: 'Popular products'),
+      SectionTitle(title: tr('Popular products')),
 
       const SizedBox(height: 16),
 
@@ -226,7 +226,7 @@ extension _HomeCatalogSections on _HomeScreenState {
       // =====================================================
       // NEW ARRIVALS
       // =====================================================
-      const SectionTitle(title: 'New arrivals'),
+      SectionTitle(title: tr('New arrivals')),
 
       const SizedBox(height: 16),
 
@@ -281,7 +281,7 @@ extension _HomeCatalogSections on _HomeScreenState {
       // =====================================================
       // RECOMMENDED
       // =====================================================
-      const SectionTitle(title: 'Recommended for you'),
+      SectionTitle(title: tr('Recommended for you')),
 
       const SizedBox(height: 16),
 
@@ -298,9 +298,10 @@ extension _HomeCatalogSections on _HomeScreenState {
             child: _RecommendedCard(
               product: product,
               onTap: () => _openProductDetails(product),
-              badge:
-                  _HomeScreenState._recommendedBadges[index %
-                      _HomeScreenState._recommendedBadges.length],
+              badge: tr(
+                _HomeScreenState._recommendedBadges[index %
+                    _HomeScreenState._recommendedBadges.length],
+              ),
               quantity: quantity,
               isFavorite: isFavorite(product),
               onFavoriteTap: () {

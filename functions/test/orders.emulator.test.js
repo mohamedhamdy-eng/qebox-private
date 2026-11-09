@@ -117,6 +117,18 @@ test("rejects inactive products and excess quantities", async () => {
   );
 });
 
+test("sends a translatable template with customer errors", async () => {
+  await db.collection("products").doc("milk").update({stockQuantity: 1});
+  await assert.rejects(place(order()), (error) => {
+    assert.strictEqual(error.message, "There is not enough stock of Milk.");
+    assert.deepStrictEqual(error.details, {
+      template: "There is not enough stock of {0}.",
+      args: ["Milk"],
+    });
+    return true;
+  });
+});
+
 test("rejects non-cash payment and missing login", async () => {
   await assert.rejects(place(order({paymentMethod: "card"})), /cash/);
   await assert.rejects(

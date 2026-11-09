@@ -39,6 +39,7 @@ class FirestoreCatalogRepository {
           return Category(
             id: doc.id,
             name: (data['name'] ?? doc.id).toString(),
+            nameAr: data['nameAr'] as String?,
             isActive: data['active'] != false,
             imageUrl: data['imageUrl'] as String?,
             sortOrder: (data['sortOrder'] as num? ?? 0).toInt(),

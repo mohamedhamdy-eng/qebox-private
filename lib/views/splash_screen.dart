@@ -38,10 +38,7 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Center(
         child: Text(
           'Qebox',
-          style: TextStyle(
-            fontSize: 42,
-            fontWeight: FontWeight.w800,
-          ),
+          style: TextStyle(fontSize: 42, fontWeight: FontWeight.w800),
         ),
       ),
     );

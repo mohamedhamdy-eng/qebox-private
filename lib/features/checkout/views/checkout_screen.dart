@@ -23,6 +23,7 @@ import '../../orders/views/order_confirmed_screen.dart';
 import '../viewmodels/checkout_view_model.dart';
 import '../viewmodels/delivery_schedule_view_model.dart';
 import 'delivery_schedule_screen.dart';
+import '../../../core/l10n/app_language.dart';
 
 part 'checkout_screen_sections.dart';
 part 'checkout_screen_pricing.dart';
@@ -99,9 +100,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         backgroundColor: const Color(0xFFF9F7F3),
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          'Checkout',
-          style: TextStyle(
+        title: Text(
+          tr('Checkout'),
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w800,
             color: Color(0xFF171717),
@@ -149,19 +150,25 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (selectedAddress == null)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 8),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
-                    'Please choose a delivery address',
-                    style: TextStyle(fontSize: 11, color: Color(0xFFE53935)),
+                    tr('Please choose a delivery address'),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFFE53935),
+                    ),
                   ),
                 )
               else if (!deliverySchedule.isComplete)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 8),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
-                    'Please choose a delivery time',
-                    style: TextStyle(fontSize: 11, color: Color(0xFFE53935)),
+                    tr('Please choose a delivery time'),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFFE53935),
+                    ),
                   ),
                 ),
               SizedBox(
@@ -195,8 +202,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   ),
                   child: Text(
                     _isPlacingOrder
-                        ? 'Placing order...'
-                        : 'Place Order • EGP ${total.toStringAsFixed(2)}',
+                        ? tr('Placing order...')
+                        : tr('Place Order • EGP {0}', [
+                            total.toStringAsFixed(2),
+                          ]),
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
@@ -470,15 +479,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final parts = <String>[];
 
     if (address.building != null && address.building!.isNotEmpty) {
-      parts.add('Building ${address.building}');
+      parts.add(tr('Building {0}', [address.building]));
     }
 
     if (address.floor != null && address.floor!.isNotEmpty) {
-      parts.add('Floor ${address.floor}');
+      parts.add(tr('Floor {0}', [address.floor]));
     }
 
     if (address.apartment != null && address.apartment!.isNotEmpty) {
-      parts.add('Apartment ${address.apartment}');
+      parts.add(tr('Apartment {0}', [address.apartment]));
     }
 
     return parts.join(' • ');
@@ -492,7 +501,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final date = state.selectedDate;
 
     if (date == null) {
-      return 'Choose delivery time';
+      return tr('Choose delivery time');
     }
 
     final now = DateTime.now();
@@ -504,11 +513,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final selected = DateTime(date.year, date.month, date.day);
 
     if (_sameDate(selected, today)) {
-      return 'Today';
+      return tr('Today');
     }
 
     if (_sameDate(selected, tomorrow)) {
-      return 'Tomorrow';
+      return tr('Tomorrow');
     }
 
     return '${_weekdayName(date)}, '
@@ -532,7 +541,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       'Sunday',
     ];
 
-    return names[date.weekday - 1];
+    return tr(names[date.weekday - 1]);
   }
 
   String _monthName(int month) {
@@ -551,6 +560,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       'Dec',
     ];
 
-    return months[month - 1];
+    return tr(months[month - 1]);
   }
 }

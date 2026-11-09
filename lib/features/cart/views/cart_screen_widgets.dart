@@ -64,7 +64,7 @@ class _CartItemCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  product.name,
+                  product.displayName,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -75,7 +75,7 @@ class _CartItemCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 7),
                 Text(
-                  'EGP ${product.price.toStringAsFixed(0)}',
+                  tr('EGP {0}', [product.price.toStringAsFixed(0)]),
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
@@ -191,7 +191,7 @@ class _CartRecommendedCard extends StatelessWidget {
           ),
           const SizedBox(height: 9),
           Text(
-            product.name,
+            product.displayName,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
@@ -206,7 +206,7 @@ class _CartRecommendedCard extends StatelessWidget {
             children: [
               Flexible(
                 child: Text(
-                  'EGP ${product.price.toStringAsFixed(0)}',
+                  tr('EGP {0}', [product.price.toStringAsFixed(0)]),
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w800,

@@ -211,12 +211,16 @@ class _SummaryRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: isTotal ? 17 : 14,
-            fontWeight: isTotal ? FontWeight.w800 : FontWeight.w500,
-            color: isTotal ? const Color(0xFF171717) : const Color(0xFF777777),
+        Expanded(
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: isTotal ? 17 : 14,
+              fontWeight: isTotal ? FontWeight.w800 : FontWeight.w500,
+              color: isTotal
+                  ? const Color(0xFF171717)
+                  : const Color(0xFF777777),
+            ),
           ),
         ),
         Text(

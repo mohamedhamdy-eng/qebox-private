@@ -11,6 +11,7 @@ import '../../products/models/product.dart';
 import '../../products/viewmodels/catalog_view_model.dart';
 import '../models/chat_message.dart';
 import '../repositories/chat_repository.dart';
+import '../../../core/l10n/app_language.dart';
 
 class ChatState {
   const ChatState({required this.messages, this.isTyping = false});
@@ -42,8 +43,9 @@ class ChatViewModel extends StateNotifier<ChatState> {
              ChatMessage(
                id: 'welcome',
                role: ChatRole.assistant,
-               text:
-                   'Hi! I am Q Bot. I understand Arabic and English. Tell me what you need and I will prepare your cart.',
+               text: tr(
+                 'Hi! I am Q Bot. I understand Arabic and English. Tell me what you need and I will prepare your cart.',
+               ),
                createdAt: DateTime.now(),
              ),
            ],
@@ -61,9 +63,20 @@ class ChatViewModel extends StateNotifier<ChatState> {
   static List<CustomerOrder> _noOrders() => const [];
   static List<CartItem> _noCartItems() => const [];
 
+  bool _replyInArabic = false;
+
+  String _t(String english, [List<Object?> args = const []]) =>
+      translate(english, args, arabic: _replyInArabic);
+
+  String _name(Product product) =>
+      _replyInArabic && (product.nameAr?.isNotEmpty ?? false)
+      ? product.nameAr!
+      : product.name;
+
   Future<void> send(String text) async {
     final cleanText = text.trim();
     if (cleanText.isEmpty || state.isTyping) return;
+    _replyInArabic = _hasArabic(cleanText);
     final now = DateTime.now();
     state = state.copyWith(
       messages: [
@@ -82,7 +95,7 @@ class ChatViewModel extends StateNotifier<ChatState> {
       _addAssistantMessage(reply ?? await _repository.sendMessage(cleanText));
     } catch (_) {
       _addAssistantMessage(
-        'I could not answer right now. Please try again in a moment.',
+        _t('I could not answer right now. Please try again in a moment.'),
       );
     }
   }
@@ -116,8 +129,10 @@ class ChatViewModel extends StateNotifier<ChatState> {
       if (partial.length == 1 && _containsAny(message, _explicitAddTerms)) {
         matches = partial;
       } else if (partial.isNotEmpty) {
-        return 'Did you mean ${partial.map((product) => product.name).join(' or ')}? '
-            'Send the full product name and I will add it.';
+        return _t(
+          'Did you mean {0}? Send the full product name and I will add it.',
+          [partial.map((product) => _name(product)).join(_t(_t(' or ')))],
+        );
       }
     }
     if (matches.isEmpty) {
@@ -127,14 +142,18 @@ class ChatViewModel extends StateNotifier<ChatState> {
             : 'Great. Tell me the products and quantities you want. Example: add 2 milk and 1 bread. I will prepare the cart, then you confirm delivery and payment in Checkout.';
       }
       if (RegExp(r'^(?:i )?(?:need|want)\s*\d*\s*$').hasMatch(message)) {
-        return 'Tell me the product name after the quantity. For example: “I need 2 bread”.';
+        return _t(
+          'Tell me the product name after the quantity. For example: “I need 2 bread”.',
+        );
       }
       if (!_containsAny(message, _explicitAddTerms)) return null;
-      final names = catalog.take(5).map((product) => product.name).join(', ');
-      return 'I did not find a product name in your message. Try: $names.';
+      final names = catalog.take(5).map((product) => _name(product)).join(', ');
+      return _t('I did not find a product name in your message. Try: {0}.', [
+        names,
+      ]);
     }
     if (_addProduct == null) {
-      return 'Cart actions are temporarily unavailable. Please try again.';
+      return _t('Cart actions are temporarily unavailable. Please try again.');
     }
 
     final added = <String>[];
@@ -147,7 +166,7 @@ class ChatViewModel extends StateNotifier<ChatState> {
       }
       final available = _remainingQuantity(product);
       if (available <= 0) {
-        atLimit.add(product.name);
+        atLimit.add(_name(product));
         continue;
       }
       final quantity = min(_requestedQuantity(message, product), available);
@@ -155,31 +174,39 @@ class ChatViewModel extends StateNotifier<ChatState> {
         _addProduct(product);
       }
       added.add(
-        quantity == 1 ? product.name : '$quantity \u00d7 ${product.name}',
+        quantity == 1 ? _name(product) : '$quantity \u00d7 ${_name(product)}',
       );
     }
     final lines = <String>[];
-    if (added.isNotEmpty) lines.add('Added ${added.join(', ')} to your cart.');
+    if (added.isNotEmpty) {
+      lines.add(_t('Added {0} to your cart.', [added.join(', ')]));
+    }
     if (atLimit.isNotEmpty) {
-      lines.add('Your cart already has the maximum of ${atLimit.join(', ')}.');
+      lines.add(
+        _t('Your cart already has the maximum of {0}.', [atLimit.join(', ')]),
+      );
     }
     if (unavailable.isNotEmpty) {
       lines.add(
-        'Unavailable: ${unavailable.map((product) => product.name).join(', ')}.',
+        _t('Unavailable: {0}.', [
+          unavailable.map((product) => _name(product)).join(', '),
+        ]),
       );
       final alternatives = _alternativesFor(unavailable);
       if (alternatives.isNotEmpty) {
-        lines.add('Try instead: ${alternatives.join(', ')}.');
+        lines.add(_t('Try instead: {0}.', [alternatives.join(', ')]));
       }
     }
     lines.add(
-      'Open Cart, then Checkout to choose delivery details and confirm your order.',
+      _t(
+        'Open Cart, then Checkout to choose delivery details and confirm your order.',
+      ),
     );
     return lines.join('\n');
   }
 
   Iterable<String> _productNames(Product product) => [
-    product.name,
+    _name(product),
     product.nameAr,
   ].whereType<String>().map(_normalize).where((name) => name.length > 1);
 
@@ -237,7 +264,7 @@ class ChatViewModel extends StateNotifier<ChatState> {
 
   String _removeFromCart(String message) {
     if (_removeProduct == null) {
-      return 'Cart actions are temporarily unavailable. Please try again.';
+      return _t('Cart actions are temporarily unavailable. Please try again.');
     }
     final products = _cartItems().map((item) => item.product).toList();
     final exact = _exactMatches(message, products);
@@ -245,41 +272,56 @@ class ChatViewModel extends StateNotifier<ChatState> {
         ? exact
         : _partialMatches(message, products);
     if (matches.isEmpty) {
-      return 'Tell me the product name you want removed from your cart.';
+      return _t('Tell me the product name you want removed from your cart.');
     }
     if (exact.isEmpty && matches.length > 1) {
-      return 'Did you mean ${matches.map((product) => product.name).join(' or ')}? '
-          'Send the full product name and I will remove it.';
+      return _t(
+        'Did you mean {0}? Send the full product name and I will remove it.',
+        [matches.map((product) => _name(product)).join(_t(_t(' or ')))],
+      );
     }
     for (final product in matches) {
       _removeProduct(product.id);
     }
-    return 'Removed ${matches.map((product) => product.name).join(', ')} from your cart.';
+    return _t('Removed {0} from your cart.', [
+      matches.map((product) => _name(product)).join(', '),
+    ]);
   }
 
   String _cartSummaryReply() {
     final items = _cartItems();
     if (items.isEmpty) {
-      return 'Your cart is empty. Tell me what you need and I will add it.';
+      return _t('Your cart is empty. Tell me what you need and I will add it.');
     }
     final lines = items
         .map(
-          (item) =>
-              '${item.quantity} x ${item.product.name} - EGP ${item.totalPrice.toStringAsFixed(2)}',
+          (item) => _t('{0} x {1} - EGP {2}', [
+            item.quantity,
+            _name(item.product),
+            item.totalPrice.toStringAsFixed(2),
+          ]),
         )
         .join('\n');
     final total = items.fold<double>(0, (sum, item) => sum + item.totalPrice);
-    return 'Your cart:\n$lines\n\nTotal: EGP ${total.toStringAsFixed(2)}.';
+    return _t('Your cart:\n{0}\n\nTotal: EGP {1}.', [
+      lines,
+      total.toStringAsFixed(2),
+    ]);
   }
 
   String _latestOrderReply() {
     final orders = _orders();
     if (orders.isEmpty) {
-      return 'You do not have any orders yet. Open My Orders to track future orders, or I can help you prepare a new cart.';
+      return _t(
+        'You do not have any orders yet. Open My Orders to track future orders, or I can help you prepare a new cart.',
+      );
     }
     final latest = [...orders]
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return 'Your latest order ${latest.first.id} is ${_orderStatus(latest.first.status)}. Open My Orders for tracking and details.';
+    return _t(
+      'Your latest order {0} is {1}. Open My Orders for tracking and details.',
+      [latest.first.id, _orderStatus(latest.first.status)],
+    );
   }
 
   String _recommendProducts() {
@@ -287,16 +329,31 @@ class ChatViewModel extends StateNotifier<ChatState> {
         .where((product) => product.isActive && product.inStock)
         .take(4)
         .toList();
-    if (products.isEmpty) return 'There are no available products right now.';
-    return 'Available picks:\n${products.map((product) => '${product.name} - EGP ${product.price.toStringAsFixed(0)}').join('\n')}';
+    if (products.isEmpty) {
+      return _t('There are no available products right now.');
+    }
+    return _t('Available picks:\n{0}', [
+      products
+          .map(
+            (product) => _t('{0} - EGP {1}', [
+              _name(product),
+              product.price.toStringAsFixed(0),
+            ]),
+          )
+          .join('\n'),
+    ]);
   }
 
   String _productDetailsReply(List<Product> products) => products
       .map((product) {
         final stock = product.isActive && product.inStock
-            ? '${product.stockQuantity} in stock'
-            : 'currently unavailable';
-        return '${product.name} - EGP ${product.price.toStringAsFixed(2)}\n$stock';
+            ? _t('{0} in stock', [product.stockQuantity])
+            : _t('currently unavailable');
+        return _t('{0} - EGP {1}\n{2}', [
+          _name(product),
+          product.price.toStringAsFixed(2),
+          stock,
+        ]);
       })
       .join('\n\n');
 
@@ -312,18 +369,18 @@ class ChatViewModel extends StateNotifier<ChatState> {
               product.inStock,
         )
         .take(3)
-        .map((product) => product.name)
+        .map((product) => _name(product))
         .toList();
   }
 
   String _orderStatus(OrderStatus status) => switch (status) {
-    OrderStatus.placed => 'received',
-    OrderStatus.scheduled => 'scheduled',
-    OrderStatus.preparing => 'being prepared',
-    OrderStatus.driverAssigned => 'assigned to a driver',
-    OrderStatus.outForDelivery => 'out for delivery',
-    OrderStatus.delivered => 'delivered',
-    OrderStatus.cancelled => 'cancelled',
+    OrderStatus.placed => _t('received'),
+    OrderStatus.scheduled => _t('scheduled'),
+    OrderStatus.preparing => _t('being prepared'),
+    OrderStatus.driverAssigned => _t('assigned to a driver'),
+    OrderStatus.outForDelivery => _t('out for delivery'),
+    OrderStatus.delivered => _t('delivered'),
+    OrderStatus.cancelled => _t('cancelled'),
   };
 
   bool _containsAny(String message, List<String> terms) =>

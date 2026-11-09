@@ -6,11 +6,10 @@ import '../../cart/models/cart_item.dart';
 import '../../cart/viewmodels/cart_view_model.dart';
 import '../../products/models/product.dart';
 import '../viewmodels/favorites_view_model.dart';
+import '../../../core/l10n/app_language.dart';
 
 class FavoritesScreen extends ConsumerWidget {
-  const FavoritesScreen({
-    super.key,
-  });
+  const FavoritesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,13 +19,10 @@ class FavoritesScreen extends ConsumerWidget {
       return Scaffold(
         backgroundColor: const Color(0xFFF9F7F3),
         appBar: _buildAppBar(context),
-        body: const Center(
+        body: Center(
           child: Text(
-            'Please sign in to view your favorites',
-            style: TextStyle(
-              fontSize: 14,
-              color: Color(0xFF777777),
-            ),
+            tr('Please sign in to view your favorites'),
+            style: const TextStyle(fontSize: 14, color: Color(0xFF777777)),
           ),
         ),
       );
@@ -34,9 +30,7 @@ class FavoritesScreen extends ConsumerWidget {
 
     final favoritesState = ref.watch(favoritesProvider);
 
-    final favorites = favoritesState.favoritesForCustomer(
-      customer.id,
-    );
+    final favorites = favoritesState.favoritesForCustomer(customer.id);
 
     final cartItems = ref.watch(cartProvider);
 
@@ -46,69 +40,39 @@ class FavoritesScreen extends ConsumerWidget {
       body: favorites.isEmpty
           ? _buildEmptyState()
           : ListView.separated(
-              padding: const EdgeInsets.fromLTRB(
-                20,
-                16,
-                20,
-                30,
-              ),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
               itemCount: favorites.length,
-              separatorBuilder: (
-                context,
-                index,
-              ) {
-                return const SizedBox(
-                  height: 12,
-                );
+              separatorBuilder: (context, index) {
+                return const SizedBox(height: 12);
               },
-              itemBuilder: (
-                context,
-                index,
-              ) {
+              itemBuilder: (context, index) {
                 final product = favorites[index];
 
-                final quantity = _quantityForProduct(
-                  product,
-                  cartItems,
-                );
+                final quantity = _quantityForProduct(product, cartItems);
 
                 return _FavoriteProductCard(
                   product: product,
                   quantity: quantity,
                   onFavoriteTap: () {
                     ref
-                        .read(
-                          favoritesProvider.notifier,
-                        )
+                        .read(favoritesProvider.notifier)
                         .toggleFavorite(
                           customerId: customer.id,
                           product: product,
                         );
                   },
                   onAddToCart: () {
-                    ref
-                        .read(
-                          cartProvider.notifier,
-                        )
-                        .addProduct(product);
+                    ref.read(cartProvider.notifier).addProduct(product);
                   },
                   onIncrease: () {
                     ref
-                        .read(
-                          cartProvider.notifier,
-                        )
-                        .increaseQuantity(
-                          product.id,
-                        );
+                        .read(cartProvider.notifier)
+                        .increaseQuantity(product.id);
                   },
                   onDecrease: () {
                     ref
-                        .read(
-                          cartProvider.notifier,
-                        )
-                        .decreaseQuantity(
-                          product.id,
-                        );
+                        .read(cartProvider.notifier)
+                        .decreaseQuantity(product.id);
                   },
                 );
               },
@@ -120,9 +84,7 @@ class FavoritesScreen extends ConsumerWidget {
   // APP BAR
   // =====================================================
 
-  PreferredSizeWidget _buildAppBar(
-    BuildContext context,
-  ) {
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       backgroundColor: const Color(0xFFF9F7F3),
       surfaceTintColor: Colors.transparent,
@@ -132,14 +94,11 @@ class FavoritesScreen extends ConsumerWidget {
         onPressed: () {
           Navigator.of(context).pop();
         },
-        icon: const Icon(
-          Icons.arrow_back_rounded,
-          color: Color(0xFF171717),
-        ),
+        icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF171717)),
       ),
-      title: const Text(
-        'My Favorites',
-        style: TextStyle(
+      title: Text(
+        tr('My Favorites'),
+        style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w800,
           color: Color(0xFF171717),
@@ -173,22 +132,19 @@ class FavoritesScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'No favorites yet',
-              style: TextStyle(
+            Text(
+              tr('No favorites yet'),
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
                 color: Color(0xFF171717),
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Products you love will appear here.',
+            Text(
+              tr('Products you love will appear here.'),
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: Color(0xFF777777),
-              ),
+              style: const TextStyle(fontSize: 13, color: Color(0xFF777777)),
             ),
           ],
         ),
@@ -200,10 +156,7 @@ class FavoritesScreen extends ConsumerWidget {
   // PRODUCT QUANTITY
   // =====================================================
 
-  int _quantityForProduct(
-    Product product,
-    List<CartItem> cartItems,
-  ) {
+  int _quantityForProduct(Product product, List<CartItem> cartItems) {
     for (final item in cartItems) {
       if (item.product.id == product.id) {
         return item.quantity;
@@ -251,7 +204,6 @@ class _FavoriteProductCard extends StatelessWidget {
           // =================================================
           // IMAGE
           // =================================================
-
           Container(
             width: 88,
             height: 88,
@@ -261,17 +213,11 @@ class _FavoriteProductCard extends StatelessWidget {
             ),
             child: product.imageUrl != null && product.imageUrl!.isNotEmpty
                 ? ClipRRect(
-                    borderRadius: BorderRadius.circular(
-                      18,
-                    ),
+                    borderRadius: BorderRadius.circular(18),
                     child: Image.network(
                       product.imageUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (
-                        context,
-                        error,
-                        stackTrace,
-                      ) {
+                      errorBuilder: (context, error, stackTrace) {
                         return const Icon(
                           Icons.shopping_bag_outlined,
                           size: 38,
@@ -292,13 +238,12 @@ class _FavoriteProductCard extends StatelessWidget {
           // =================================================
           // PRODUCT INFO
           // =================================================
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  product.name,
+                  product.displayName,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -311,26 +256,20 @@ class _FavoriteProductCard extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      'EGP ${product.price.toStringAsFixed(0)}',
+                      tr('EGP {0}', [product.price.toStringAsFixed(0)]),
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
-                        color: Color(
-                          0xFFEE7424,
-                        ),
+                        color: Color(0xFFEE7424),
                       ),
                     ),
                     if (product.hasDiscount) ...[
-                      const SizedBox(
-                        width: 6,
-                      ),
+                      const SizedBox(width: 6),
                       Text(
-                        'EGP ${product.oldPrice!.toStringAsFixed(0)}',
+                        tr('EGP {0}', [product.oldPrice!.toStringAsFixed(0)]),
                         style: const TextStyle(
                           fontSize: 10,
-                          color: Color(
-                            0xFF999999,
-                          ),
+                          color: Color(0xFF999999),
                           decoration: TextDecoration.lineThrough,
                         ),
                       ),
@@ -353,14 +292,11 @@ class _FavoriteProductCard extends StatelessWidget {
           // =================================================
           // FAVORITE
           // =================================================
-
           Align(
             alignment: Alignment.topCenter,
             child: InkWell(
               onTap: onFavoriteTap,
-              borderRadius: BorderRadius.circular(
-                20,
-              ),
+              borderRadius: BorderRadius.circular(20),
               child: const SizedBox(
                 width: 38,
                 height: 38,
@@ -387,26 +323,17 @@ class _FavoriteProductCard extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onAddToCart,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(
-            0xFF171717,
-          ),
+          backgroundColor: const Color(0xFF171717),
           foregroundColor: Colors.white,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(
-            horizontal: 18,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 18),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(
-              20,
-            ),
+            borderRadius: BorderRadius.circular(20),
           ),
         ),
-        child: const Text(
-          'Add to cart',
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-          ),
+        child: Text(
+          tr('Add to cart'),
+          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
         ),
       ),
     );
@@ -428,17 +355,11 @@ class _FavoriteProductCard extends StatelessWidget {
         children: [
           InkWell(
             onTap: onDecrease,
-            borderRadius: BorderRadius.circular(
-              20,
-            ),
+            borderRadius: BorderRadius.circular(20),
             child: const SizedBox(
               width: 34,
               height: 36,
-              child: Icon(
-                Icons.remove_rounded,
-                color: Colors.white,
-                size: 17,
-              ),
+              child: Icon(Icons.remove_rounded, color: Colors.white, size: 17),
             ),
           ),
           Text(
@@ -451,17 +372,11 @@ class _FavoriteProductCard extends StatelessWidget {
           ),
           InkWell(
             onTap: onIncrease,
-            borderRadius: BorderRadius.circular(
-              20,
-            ),
+            borderRadius: BorderRadius.circular(20),
             child: const SizedBox(
               width: 34,
               height: 36,
-              child: Icon(
-                Icons.add_rounded,
-                color: Colors.white,
-                size: 17,
-              ),
+              child: Icon(Icons.add_rounded, color: Colors.white, size: 17),
             ),
           ),
         ],
@@ -475,19 +390,14 @@ class _FavoriteProductCard extends StatelessWidget {
 
   Widget _buildOutOfStock() {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: const Color(0xFFCCCCCC),
-        borderRadius: BorderRadius.circular(
-          20,
-        ),
+        borderRadius: BorderRadius.circular(20),
       ),
-      child: const Text(
-        'Out of stock',
-        style: TextStyle(
+      child: Text(
+        tr('Out of stock'),
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 10,
           fontWeight: FontWeight.w700,

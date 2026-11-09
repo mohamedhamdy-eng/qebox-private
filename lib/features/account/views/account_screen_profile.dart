@@ -59,18 +59,18 @@ extension _AccountProfileView on _AccountScreenState {
           ),
           const SizedBox(height: 20),
           _AccountInfoCard(
-            title: 'Personal information',
+            title: tr('Personal information'),
             children: [
-              _InfoRow(title: 'Full name', value: customer.name),
-              _InfoRow(title: 'Mobile', value: customer.phone),
-              _InfoRow(title: 'Customer ID', value: customer.id),
+              _InfoRow(title: tr('Full name'), value: customer.name),
+              _InfoRow(title: tr('Mobile'), value: customer.phone),
+              _InfoRow(title: tr('Customer ID'), value: customer.id),
             ],
           ),
           const SizedBox(height: 16),
           _AccountMenuItem(
             icon: Icons.location_on_outlined,
-            title: 'Addresses',
-            subtitle: 'Manage your delivery addresses',
+            title: tr('Addresses'),
+            subtitle: tr('Manage your delivery addresses'),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -84,8 +84,8 @@ extension _AccountProfileView on _AccountScreenState {
           const SizedBox(height: 12),
           _AccountMenuItem(
             icon: Icons.receipt_long_outlined,
-            title: 'My Orders',
-            subtitle: 'View your current and previous orders',
+            title: tr('My Orders'),
+            subtitle: tr('View your current and previous orders'),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -99,8 +99,8 @@ extension _AccountProfileView on _AccountScreenState {
           const SizedBox(height: 12),
           _AccountMenuItem(
             icon: Icons.favorite_border_rounded,
-            title: 'My Favorites',
-            subtitle: 'View products you saved',
+            title: tr('My Favorites'),
+            subtitle: tr('View products you saved'),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -114,17 +114,17 @@ extension _AccountProfileView on _AccountScreenState {
           const SizedBox(height: 12),
           _AccountMenuItem(
             icon: Icons.account_balance_wallet_outlined,
-            title: 'Wallet',
-            subtitle: 'Qebox wallet balance',
+            title: tr('Wallet'),
+            subtitle: tr('Qebox wallet balance'),
             onTap: () {
-              _showMessage('Wallet will be connected later');
+              _showMessage(tr('Wallet will be connected later'));
             },
           ),
           const SizedBox(height: 12),
           _AccountMenuItem(
             icon: Icons.stars_outlined,
-            title: 'Points & Loyalty',
-            subtitle: 'Your Qebox rewards',
+            title: tr('Points & Loyalty'),
+            subtitle: tr('Your Qebox rewards'),
             onTap: () {
               Navigator.of(
                 context,
@@ -135,7 +135,7 @@ extension _AccountProfileView on _AccountScreenState {
           _AccountMenuItem(
             icon: Icons.smart_toy_outlined,
             title: 'Q Bot',
-            subtitle: 'Ask your Qebox AI assistant',
+            subtitle: tr('Ask your Qebox AI assistant'),
             onTap: () {
               Navigator.of(
                 context,
@@ -149,9 +149,9 @@ extension _AccountProfileView on _AccountScreenState {
             child: OutlinedButton.icon(
               onPressed: _logout,
               icon: const Icon(Icons.logout_rounded),
-              label: const Text(
-                'Logout',
-                style: TextStyle(fontWeight: FontWeight.w800),
+              label: Text(
+                tr('Logout'),
+                style: const TextStyle(fontWeight: FontWeight.w800),
               ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFFE53935),

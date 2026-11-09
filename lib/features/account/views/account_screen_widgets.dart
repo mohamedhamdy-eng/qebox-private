@@ -181,7 +181,7 @@ class _InfoRow extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              textAlign: TextAlign.right,
+              textAlign: TextAlign.end,
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,

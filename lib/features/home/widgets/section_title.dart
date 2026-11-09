@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/qebox_theme.dart';
+import '../../../core/l10n/app_language.dart';
 
 class SectionTitle extends StatelessWidget {
   final String title;
   final VoidCallback? onSeeAll;
 
-  const SectionTitle({
-    super.key,
-    required this.title,
-    this.onSeeAll,
-  });
+  const SectionTitle({super.key, required this.title, this.onSeeAll});
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +28,9 @@ class SectionTitle extends StatelessWidget {
         ),
         TextButton(
           onPressed: onSeeAll,
-          child: const Text(
-            'See all',
-            style: TextStyle(
+          child: Text(
+            tr('See all'),
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: QeboxPalette.orange,

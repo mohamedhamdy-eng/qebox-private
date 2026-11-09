@@ -75,13 +75,18 @@ extension _HomeTopSections on _HomeScreenState {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Delivering to',
-                      style: TextStyle(fontSize: 11, color: Color(0xFF777777)),
+                    Text(
+                      tr('Delivering to'),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF777777),
+                      ),
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      selectedAddress?.label ?? 'Choose address',
+                      selectedAddress == null
+                          ? tr('Choose address')
+                          : tr(selectedAddress.label),
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
@@ -91,7 +96,7 @@ extension _HomeTopSections on _HomeScreenState {
                     const SizedBox(height: 3),
                     Text(
                       selectedAddress?.addressLine ??
-                          'Add your delivery address',
+                          tr('Add your delivery address'),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(

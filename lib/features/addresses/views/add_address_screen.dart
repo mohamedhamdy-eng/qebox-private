@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/address.dart';
 import '../viewmodels/address_view_model.dart';
+import '../../../core/l10n/app_language.dart';
 
 class AddAddressScreen extends ConsumerStatefulWidget {
   const AddAddressScreen({super.key});
@@ -40,7 +41,8 @@ class _AddAddressScreenState extends ConsumerState<AddAddressScreen> {
       return;
     }
 
-    final addressLine = '${_areaController.text.trim()}, '
+    final addressLine =
+        '${_areaController.text.trim()}, '
         '${_streetController.text.trim()}';
 
     final newAddress = Address(
@@ -78,9 +80,9 @@ class _AddAddressScreenState extends ConsumerState<AddAddressScreen> {
         backgroundColor: const Color(0xFFF9F7F3),
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          'Add Address',
-          style: TextStyle(
+        title: Text(
+          tr('Add Address'),
+          style: const TextStyle(
             color: Color(0xFF171717),
             fontSize: 20,
             fontWeight: FontWeight.w800,
@@ -92,22 +94,16 @@ class _AddAddressScreenState extends ConsumerState<AddAddressScreen> {
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-              20,
-              10,
-              20,
-              120,
-            ),
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 120),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // =====================================
                 // ADDRESS LABEL
                 // =====================================
-
-                const Text(
-                  'Address label',
-                  style: TextStyle(
+                Text(
+                  tr('Address label'),
+                  style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF171717),
@@ -120,7 +116,7 @@ class _AddAddressScreenState extends ConsumerState<AddAddressScreen> {
                   children: [
                     Expanded(
                       child: _LabelButton(
-                        title: 'Home',
+                        title: tr('Home'),
                         icon: Icons.home_outlined,
                         selected: _selectedLabel == 'Home',
                         onTap: () {
@@ -133,7 +129,7 @@ class _AddAddressScreenState extends ConsumerState<AddAddressScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: _LabelButton(
-                        title: 'Work',
+                        title: tr('Work'),
                         icon: Icons.work_outline_rounded,
                         selected: _selectedLabel == 'Work',
                         onTap: () {
@@ -146,7 +142,7 @@ class _AddAddressScreenState extends ConsumerState<AddAddressScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: _LabelButton(
-                        title: 'Other',
+                        title: tr('Other'),
                         icon: Icons.place_outlined,
                         selected: _selectedLabel == 'Other',
                         onTap: () {
@@ -164,10 +160,9 @@ class _AddAddressScreenState extends ConsumerState<AddAddressScreen> {
                 // =====================================
                 // ADDRESS DETAILS
                 // =====================================
-
-                const Text(
-                  'Address details',
-                  style: TextStyle(
+                Text(
+                  tr('Address details'),
+                  style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF171717),
@@ -178,8 +173,8 @@ class _AddAddressScreenState extends ConsumerState<AddAddressScreen> {
 
                 _AddressField(
                   controller: _areaController,
-                  label: 'Area',
-                  hint: 'Example: Smouha',
+                  label: tr('Area'),
+                  hint: tr('Example: Smouha'),
                   icon: Icons.location_city_outlined,
                   requiredField: true,
                 ),
@@ -188,8 +183,8 @@ class _AddAddressScreenState extends ConsumerState<AddAddressScreen> {
 
                 _AddressField(
                   controller: _streetController,
-                  label: 'Street',
-                  hint: 'Street name',
+                  label: tr('Street'),
+                  hint: tr('Street name'),
                   icon: Icons.signpost_outlined,
                   requiredField: true,
                 ),
@@ -201,7 +196,7 @@ class _AddAddressScreenState extends ConsumerState<AddAddressScreen> {
                     Expanded(
                       child: _AddressField(
                         controller: _buildingController,
-                        label: 'Building',
+                        label: tr('Building'),
                         hint: '12',
                         icon: Icons.apartment_outlined,
                       ),
@@ -210,7 +205,7 @@ class _AddAddressScreenState extends ConsumerState<AddAddressScreen> {
                     Expanded(
                       child: _AddressField(
                         controller: _floorController,
-                        label: 'Floor',
+                        label: tr('Floor'),
                         hint: '3',
                         icon: Icons.stairs_outlined,
                       ),
@@ -222,8 +217,8 @@ class _AddAddressScreenState extends ConsumerState<AddAddressScreen> {
 
                 _AddressField(
                   controller: _apartmentController,
-                  label: 'Apartment',
-                  hint: 'Apartment number',
+                  label: tr('Apartment'),
+                  hint: tr('Apartment number'),
                   icon: Icons.door_front_door_outlined,
                 ),
 
@@ -231,8 +226,8 @@ class _AddAddressScreenState extends ConsumerState<AddAddressScreen> {
 
                 _AddressField(
                   controller: _landmarkController,
-                  label: 'Landmark',
-                  hint: 'Example: Near the supermarket',
+                  label: tr('Landmark'),
+                  hint: tr('Example: Near the supermarket'),
                   icon: Icons.flag_outlined,
                 ),
 
@@ -241,7 +236,6 @@ class _AddAddressScreenState extends ConsumerState<AddAddressScreen> {
                 // =====================================
                 // DEFAULT ADDRESS
                 // =====================================
-
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -254,45 +248,35 @@ class _AddAddressScreenState extends ConsumerState<AddAddressScreen> {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: const Color(
-                            0xFFFFE6D5,
-                          ),
-                          borderRadius: BorderRadius.circular(
-                            14,
-                          ),
+                          color: const Color(0xFFFFE6D5),
+                          borderRadius: BorderRadius.circular(14),
                         ),
                         child: const Icon(
                           Icons.star_outline_rounded,
                           color: Color(0xFFEE7424),
                         ),
                       ),
-                      const SizedBox(
-                        width: 14,
-                      ),
-                      const Expanded(
+                      const SizedBox(width: 14),
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Make default address',
-                              style: TextStyle(
+                              tr('Make default address'),
+                              style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w800,
-                                color: Color(
-                                  0xFF171717,
-                                ),
+                                color: Color(0xFF171717),
                               ),
                             ),
-                            SizedBox(
-                              height: 3,
-                            ),
+                            const SizedBox(height: 3),
                             Text(
-                              'Use this address automatically for future orders',
-                              style: TextStyle(
+                              tr(
+                                'Use this address automatically for future orders',
+                              ),
+                              style: const TextStyle(
                                 fontSize: 11,
-                                color: Color(
-                                  0xFF777777,
-                                ),
+                                color: Color(0xFF777777),
                               ),
                             ),
                           ],
@@ -300,9 +284,7 @@ class _AddAddressScreenState extends ConsumerState<AddAddressScreen> {
                       ),
                       Switch(
                         value: _makeDefault,
-                        activeThumbColor: const Color(
-                          0xFFEE7424,
-                        ),
+                        activeThumbColor: const Color(0xFFEE7424),
                         onChanged: (value) {
                           setState(() {
                             _makeDefault = value;
@@ -321,15 +303,9 @@ class _AddAddressScreenState extends ConsumerState<AddAddressScreen> {
       // =====================================
       // SAVE BUTTON
       // =====================================
-
       bottomNavigationBar: SafeArea(
         child: Container(
-          padding: const EdgeInsets.fromLTRB(
-            20,
-            14,
-            20,
-            18,
-          ),
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
           decoration: const BoxDecoration(
             color: Colors.white,
             boxShadow: [
@@ -345,20 +321,16 @@ class _AddAddressScreenState extends ConsumerState<AddAddressScreen> {
             child: ElevatedButton(
               onPressed: _saveAddress,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(
-                  0xFF171717,
-                ),
+                backgroundColor: const Color(0xFF171717),
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                    28,
-                  ),
+                  borderRadius: BorderRadius.circular(28),
                 ),
               ),
-              child: const Text(
-                'Save Address',
-                style: TextStyle(
+              child: Text(
+                tr('Save Address'),
+                style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
                 ),
@@ -396,18 +368,10 @@ class _LabelButton extends StatelessWidget {
       child: Container(
         height: 82,
         decoration: BoxDecoration(
-          color: selected
-              ? const Color(
-                  0xFFFFE6D5,
-                )
-              : Colors.white,
+          color: selected ? const Color(0xFFFFE6D5) : Colors.white,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: selected
-                ? const Color(
-                    0xFFEE7424,
-                  )
-                : Colors.transparent,
+            color: selected ? const Color(0xFFEE7424) : Colors.transparent,
             width: 1.5,
           ),
         ),
@@ -417,12 +381,8 @@ class _LabelButton extends StatelessWidget {
             Icon(
               icon,
               color: selected
-                  ? const Color(
-                      0xFFEE7424,
-                    )
-                  : const Color(
-                      0xFF777777,
-                    ),
+                  ? const Color(0xFFEE7424)
+                  : const Color(0xFF777777),
             ),
             const SizedBox(height: 7),
             Text(
@@ -431,12 +391,8 @@ class _LabelButton extends StatelessWidget {
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
                 color: selected
-                    ? const Color(
-                        0xFFEE7424,
-                      )
-                    : const Color(
-                        0xFF171717,
-                      ),
+                    ? const Color(0xFFEE7424)
+                    : const Color(0xFF171717),
               ),
             ),
           ],
@@ -471,7 +427,7 @@ class _AddressField extends StatelessWidget {
       controller: controller,
       validator: (value) {
         if (requiredField && (value == null || value.trim().isEmpty)) {
-          return '$label is required';
+          return tr('{0} is required', [label]);
         }
 
         return null;
@@ -479,10 +435,7 @@ class _AddressField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        prefixIcon: Icon(
-          icon,
-          color: const Color(0xFFEE7424),
-        ),
+        prefixIcon: Icon(icon, color: const Color(0xFFEE7424)),
         filled: true,
         fillColor: Colors.white,
         border: OutlineInputBorder(
@@ -495,22 +448,15 @@ class _AddressField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
-            color: Color(0xFFEE7424),
-            width: 1.5,
-          ),
+          borderSide: const BorderSide(color: Color(0xFFEE7424), width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
-            color: Colors.red,
-          ),
+          borderSide: const BorderSide(color: Colors.red),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
-            color: Colors.red,
-          ),
+          borderSide: const BorderSide(color: Colors.red),
         ),
       ),
     );

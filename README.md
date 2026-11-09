@@ -29,6 +29,15 @@ firebase deploy --only functions,firestore:rules
 Do the same with `firebase use default` for production. Create the Gemini key
 in Google AI Studio. Do not commit the key.
 
+## Languages
+
+The app supports English and Arabic. It follows the device language, and the
+customer can change it from the language button on the Account screen.
+
+To add or change text, wrap the English text in `tr()` and add the Arabic text
+to `lib/core/l10n/translations_ar.dart`. A test fails if the Arabic text is
+missing. Add a `nameAr` field to products and categories to show Arabic names.
+
 ## Coupon fields
 
 Coupons in the `coupons` collection accept these fields: `code` (uppercase),

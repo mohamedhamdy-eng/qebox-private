@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/home/views/home_screen.dart';
 import '../features/onboarding/viewmodels/onboarding_view_model.dart';
+import '../core/l10n/app_language.dart';
 
 class OnboardingScreen extends ConsumerWidget {
   const OnboardingScreen({super.key});
@@ -47,9 +48,9 @@ class OnboardingScreen extends ConsumerWidget {
                             onPressed: () {
                               goToHome(context, ref);
                             },
-                            child: const Text(
-                              'Skip',
-                              style: TextStyle(
+                            child: Text(
+                              tr('Skip'),
+                              style: const TextStyle(
                                 color: Colors.black54,
                                 fontSize: 15,
                               ),
@@ -90,9 +91,9 @@ class OnboardingScreen extends ConsumerWidget {
                                   color: const Color(0xFFEE7424),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
-                                child: const Text(
-                                  '25% OFF FRESH',
-                                  style: TextStyle(
+                                child: Text(
+                                  tr('25% OFF FRESH'),
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
@@ -106,11 +107,11 @@ class OnboardingScreen extends ConsumerWidget {
 
                       const SizedBox(height: 32),
 
-                      const Align(
+                      Align(
                         alignment: AlignmentDirectional.centerStart,
                         child: Text(
-                          'A SMARTER WAY TO SHOP',
-                          style: TextStyle(
+                          tr('A SMARTER WAY TO SHOP'),
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 1.4,
@@ -121,11 +122,11 @@ class OnboardingScreen extends ConsumerWidget {
 
                       const SizedBox(height: 12),
 
-                      const Align(
+                      Align(
                         alignment: AlignmentDirectional.centerStart,
                         child: Text(
-                          'Everything you need.\nOne Qebox.',
-                          style: TextStyle(
+                          tr('Everything you need.\nOne Qebox.'),
+                          style: const TextStyle(
                             fontSize: 34,
                             height: 1.05,
                             fontWeight: FontWeight.w800,
@@ -136,11 +137,13 @@ class OnboardingScreen extends ConsumerWidget {
 
                       const SizedBox(height: 15),
 
-                      const Align(
+                      Align(
                         alignment: AlignmentDirectional.centerStart,
                         child: Text(
-                          'Fresh groceries, daily essentials and members-only savings—delivered to your door.',
-                          style: TextStyle(
+                          tr(
+                            'Fresh groceries, daily essentials and members-only savings—delivered to your door.',
+                          ),
+                          style: const TextStyle(
                             fontSize: 15,
                             height: 1.5,
                             color: Color(0xFF666666),
@@ -150,25 +153,25 @@ class OnboardingScreen extends ConsumerWidget {
 
                       const SizedBox(height: 22),
 
-                      const Row(
+                      Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             child: _Feature(
                               icon: Icons.eco_outlined,
-                              text: 'Fresh daily',
+                              text: tr('Fresh daily'),
                             ),
                           ),
                           Expanded(
                             child: _Feature(
                               icon: Icons.bolt_outlined,
-                              text: 'Fast delivery',
+                              text: tr('Fast delivery'),
                             ),
                           ),
                           Expanded(
                             child: _Feature(
                               icon: Icons.local_offer_outlined,
-                              text: 'Big savings',
+                              text: tr('Big savings'),
                             ),
                           ),
                         ],
@@ -191,9 +194,9 @@ class OnboardingScreen extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(30),
                             ),
                           ),
-                          child: const Text(
-                            'Explore Qebox  →',
-                            style: TextStyle(
+                          child: Text(
+                            tr('Explore Qebox  →'),
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                             ),

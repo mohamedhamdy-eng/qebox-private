@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../home/views/home_screen.dart';
 import '../models/order.dart';
+import '../../../core/l10n/app_language.dart';
 
 class OrderConfirmedScreen extends StatelessWidget {
   final CustomerOrder order;
 
-  const OrderConfirmedScreen({
-    super.key,
-    required this.order,
-  });
+  const OrderConfirmedScreen({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
@@ -17,18 +15,12 @@ class OrderConfirmedScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF9F7F3),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            20,
-            40,
-            20,
-            30,
-          ),
+          padding: const EdgeInsets.fromLTRB(20, 40, 20, 30),
           child: Column(
             children: [
               // =========================================
               // SUCCESS ICON
               // =========================================
-
               Container(
                 width: 92,
                 height: 92,
@@ -45,10 +37,10 @@ class OrderConfirmedScreen extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              const Text(
-                'Order confirmed!',
+              Text(
+                tr('Order confirmed!'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w900,
                   color: Color(0xFF171717),
@@ -57,10 +49,10 @@ class OrderConfirmedScreen extends StatelessWidget {
 
               const SizedBox(height: 8),
 
-              const Text(
-                'Your order has been received successfully.',
+              Text(
+                tr('Your order has been received successfully.'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 13,
                   height: 1.5,
                   color: Color(0xFF777777),
@@ -72,7 +64,6 @@ class OrderConfirmedScreen extends StatelessWidget {
               // =========================================
               // ORDER NUMBER
               // =========================================
-
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
@@ -82,9 +73,9 @@ class OrderConfirmedScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    const Text(
-                      'Order number',
-                      style: TextStyle(
+                    Text(
+                      tr('Order number'),
+                      style: const TextStyle(
                         fontSize: 12,
                         color: Color(0xFF777777),
                       ),
@@ -108,7 +99,6 @@ class OrderConfirmedScreen extends StatelessWidget {
               // =========================================
               // SCHEDULED STATUS
               // =========================================
-
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(18),
@@ -136,9 +126,9 @@ class OrderConfirmedScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Scheduled delivery',
-                            style: TextStyle(
+                          Text(
+                            tr('Scheduled delivery'),
+                            style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF171717),
@@ -154,9 +144,11 @@ class OrderConfirmedScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 7),
-                          const Text(
-                            'We will prepare your order based on your selected delivery time. Live tracking will start when your delivery begins.',
-                            style: TextStyle(
+                          Text(
+                            tr(
+                              'We will prepare your order based on your selected delivery time. Live tracking will start when your delivery begins.',
+                            ),
+                            style: const TextStyle(
                               fontSize: 11,
                               height: 1.5,
                               color: Color(0xFF777777),
@@ -174,7 +166,6 @@ class OrderConfirmedScreen extends StatelessWidget {
               // =========================================
               // ORDER DETAILS
               // =========================================
-
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
@@ -186,54 +177,44 @@ class OrderConfirmedScreen extends StatelessWidget {
                   children: [
                     _InfoRow(
                       icon: Icons.person_outline_rounded,
-                      title: 'Customer',
+                      title: tr('Customer'),
                       value: _customerText(order),
                     ),
                     const Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 16,
-                      ),
+                      padding: EdgeInsets.symmetric(vertical: 16),
                       child: Divider(height: 1),
                     ),
                     _InfoRow(
                       icon: Icons.location_on_outlined,
-                      title: 'Delivery address',
-                      value: '${order.addressLabel}\n${order.addressLine}',
+                      title: tr('Delivery address'),
+                      value: '${tr(order.addressLabel)}\n${order.addressLine}',
                     ),
                     const Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 16,
-                      ),
+                      padding: EdgeInsets.symmetric(vertical: 16),
                       child: Divider(height: 1),
                     ),
                     _InfoRow(
                       icon: Icons.payments_outlined,
-                      title: 'Payment',
-                      value: _paymentText(
-                        order.paymentMethod,
-                      ),
+                      title: tr('Payment'),
+                      value: _paymentText(order.paymentMethod),
                     ),
                     const Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 16,
-                      ),
+                      padding: EdgeInsets.symmetric(vertical: 16),
                       child: Divider(height: 1),
                     ),
                     _InfoRow(
                       icon: Icons.shopping_bag_outlined,
-                      title: 'Items',
-                      value: '${_totalItems(order)} items',
+                      title: tr('Items'),
+                      value: tr('{0} items', [_totalItems(order)]),
                     ),
                     const Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 16,
-                      ),
+                      padding: EdgeInsets.symmetric(vertical: 16),
                       child: Divider(height: 1),
                     ),
                     _InfoRow(
                       icon: Icons.receipt_long_outlined,
-                      title: 'Total',
-                      value: 'EGP ${order.total.toStringAsFixed(2)}',
+                      title: tr('Total'),
+                      value: tr('EGP {0}', [order.total.toStringAsFixed(2)]),
                       highlight: true,
                     ),
                   ],
@@ -243,7 +224,6 @@ class OrderConfirmedScreen extends StatelessWidget {
               // =========================================
               // ORDER NOTES
               // =========================================
-
               if (order.orderNote != null &&
                   order.orderNote!.trim().isNotEmpty) ...[
                 const SizedBox(height: 16),
@@ -257,18 +237,15 @@ class OrderConfirmedScreen extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
-                        Icons.notes_rounded,
-                        color: Color(0xFFEE7424),
-                      ),
+                      const Icon(Icons.notes_rounded, color: Color(0xFFEE7424)),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Order notes',
-                              style: TextStyle(
+                            Text(
+                              tr('Order notes'),
+                              style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFF171717),
@@ -296,7 +273,6 @@ class OrderConfirmedScreen extends StatelessWidget {
               // =========================================
               // CONTINUE SHOPPING
               // =========================================
-
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -319,9 +295,9 @@ class OrderConfirmedScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(28),
                     ),
                   ),
-                  child: const Text(
-                    'Continue shopping',
-                    style: TextStyle(
+                  child: Text(
+                    tr('Continue shopping'),
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
                     ),
@@ -339,9 +315,7 @@ class OrderConfirmedScreen extends StatelessWidget {
   // CUSTOMER TEXT
   // ===========================================
 
-  static String _customerText(
-    CustomerOrder order,
-  ) {
+  static String _customerText(CustomerOrder order) {
     final lines = <String>[];
 
     if (order.customerName.trim().isNotEmpty) {
@@ -353,11 +327,11 @@ class OrderConfirmedScreen extends StatelessWidget {
     }
 
     if (order.customerId.trim().isNotEmpty) {
-      lines.add('ID: ${order.customerId.trim()}');
+      lines.add(tr('ID: {0}', [order.customerId.trim()]));
     }
 
     if (lines.isEmpty) {
-      return 'Customer information not available';
+      return tr('Customer information not available');
     }
 
     return lines.join('\n');
@@ -367,31 +341,24 @@ class OrderConfirmedScreen extends StatelessWidget {
   // TOTAL ITEMS
   // ===========================================
 
-  static int _totalItems(
-    CustomerOrder order,
-  ) {
-    return order.items.fold(
-      0,
-      (total, item) => total + item.quantity,
-    );
+  static int _totalItems(CustomerOrder order) {
+    return order.items.fold(0, (total, item) => total + item.quantity);
   }
 
   // ===========================================
   // PAYMENT TEXT
   // ===========================================
 
-  static String _paymentText(
-    OrderPaymentMethod method,
-  ) {
+  static String _paymentText(OrderPaymentMethod method) {
     switch (method) {
       case OrderPaymentMethod.cash:
-        return 'Cash on delivery';
+        return tr('Cash on delivery');
 
       case OrderPaymentMethod.card:
-        return 'Credit / Debit Card';
+        return tr('Credit / Debit Card');
 
       case OrderPaymentMethod.wallet:
-        return 'Qebox Wallet';
+        return tr('Qebox Wallet');
     }
   }
 
@@ -399,38 +366,23 @@ class OrderConfirmedScreen extends StatelessWidget {
   // DELIVERY DATE
   // ===========================================
 
-  static String _deliveryDateText(
-    CustomerOrder order,
-  ) {
+  static String _deliveryDateText(CustomerOrder order) {
     final date = order.deliveryStart;
 
     final now = DateTime.now();
 
-    final today = DateTime(
-      now.year,
-      now.month,
-      now.day,
-    );
+    final today = DateTime(now.year, now.month, now.day);
 
-    final tomorrow = today.add(
-      const Duration(days: 1),
-    );
+    final tomorrow = today.add(const Duration(days: 1));
 
-    final selected = DateTime(
-      date.year,
-      date.month,
-      date.day,
-    );
+    final selected = DateTime(date.year, date.month, date.day);
 
     String dayText;
 
     if (_sameDate(selected, today)) {
-      dayText = 'Today';
-    } else if (_sameDate(
-      selected,
-      tomorrow,
-    )) {
-      dayText = 'Tomorrow';
+      dayText = tr('Today');
+    } else if (_sameDate(selected, tomorrow)) {
+      dayText = tr('Tomorrow');
     } else {
       dayText = '${_weekdayName(date)}, ${date.day} ${_monthName(date.month)}';
     }
@@ -440,19 +392,14 @@ class OrderConfirmedScreen extends StatelessWidget {
         '${_formatTime(order.deliveryEnd)}';
   }
 
-  static bool _sameDate(
-    DateTime first,
-    DateTime second,
-  ) {
+  static bool _sameDate(DateTime first, DateTime second) {
     return first.year == second.year &&
         first.month == second.month &&
         first.day == second.day;
   }
 
-  static String _formatTime(
-    DateTime date,
-  ) {
-    final period = date.hour >= 12 ? 'PM' : 'AM';
+  static String _formatTime(DateTime date) {
+    final period = date.hour >= 12 ? tr('PM') : tr('AM');
 
     var hour = date.hour % 12;
 
@@ -463,9 +410,7 @@ class OrderConfirmedScreen extends StatelessWidget {
     return '$hour:00 $period';
   }
 
-  static String _weekdayName(
-    DateTime date,
-  ) {
+  static String _weekdayName(DateTime date) {
     const names = [
       'Monday',
       'Tuesday',
@@ -476,12 +421,10 @@ class OrderConfirmedScreen extends StatelessWidget {
       'Sunday',
     ];
 
-    return names[date.weekday - 1];
+    return tr(names[date.weekday - 1]);
   }
 
-  static String _monthName(
-    int month,
-  ) {
+  static String _monthName(int month) {
     const months = [
       'Jan',
       'Feb',
@@ -497,7 +440,7 @@ class OrderConfirmedScreen extends StatelessWidget {
       'Dec',
     ];
 
-    return months[month - 1];
+    return tr(months[month - 1]);
   }
 }
 
@@ -530,11 +473,7 @@ class _InfoRow extends StatelessWidget {
             color: const Color(0xFFFFE6D5),
             borderRadius: BorderRadius.circular(13),
           ),
-          child: Icon(
-            icon,
-            size: 21,
-            color: const Color(0xFFEE7424),
-          ),
+          child: Icon(icon, size: 21, color: const Color(0xFFEE7424)),
         ),
         const SizedBox(width: 13),
         Expanded(
@@ -543,10 +482,7 @@ class _InfoRow extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: Color(0xFF777777),
-                ),
+                style: const TextStyle(fontSize: 11, color: Color(0xFF777777)),
               ),
               const SizedBox(height: 4),
               Text(

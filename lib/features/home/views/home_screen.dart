@@ -23,6 +23,7 @@ import '../../products/widgets/product_card.dart';
 import '../viewmodels/home_search_view_model.dart';
 import '../widgets/category_item.dart';
 import '../widgets/section_title.dart';
+import '../../../core/l10n/app_language.dart';
 
 part 'home_screen_top.dart';
 part 'home_screen_catalog.dart';
@@ -112,26 +113,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                'EGP ${bundle.price.toStringAsFixed(2)} · ${bundle.productIds.length} products',
+                tr('EGP {0} · {1} products', [
+                  bundle.price.toStringAsFixed(2),
+                  bundle.productIds.length,
+                ]),
                 style: const TextStyle(color: QeboxPalette.muted),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Included products',
-                style: TextStyle(fontWeight: FontWeight.w700),
+              Text(
+                tr('Included products'),
+                style: const TextStyle(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 6),
               if (included.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  child: Text('Product details are loading.'),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Text(tr('Product details are loading.')),
                 ),
               for (final product in included)
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.shopping_bag_outlined),
-                  title: Text(product.name),
-                  trailing: Text('EGP ${product.price.toStringAsFixed(2)}'),
+                  title: Text(product.displayName),
+                  trailing: Text(
+                    tr('EGP {0}', [product.price.toStringAsFixed(2)]),
+                  ),
                 ),
               const SizedBox(height: 12),
               FilledButton.icon(
@@ -139,11 +145,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ref.read(cartProvider.notifier).addBundle(bundle);
                   Navigator.pop(sheetContext);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('${bundle.name} added to cart')),
+                    SnackBar(
+                      content: Text(tr('{0} added to cart', [bundle.name])),
+                    ),
                   );
                 },
                 icon: const Icon(Icons.add_shopping_cart_outlined),
-                label: const Text('Add bundle to cart'),
+                label: Text(tr('Add bundle to cart')),
               ),
             ],
           ),
@@ -202,8 +210,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       SnackBar(
         content: Text(
           wasFavorite
-              ? '${product.name} removed from favorites'
-              : '${product.name} added to favorites',
+              ? tr('{0} removed from favorites', [product.displayName])
+              : tr('{0} added to favorites', [product.displayName]),
         ),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
@@ -255,10 +263,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${product.name} added to cart'),
+        content: Text(tr('{0} added to cart', [product.displayName])),
         duration: const Duration(seconds: 3),
         behavior: SnackBarBehavior.floating,
-        action: SnackBarAction(label: 'VIEW CART', onPressed: _openCart),
+        action: SnackBarAction(label: tr('VIEW CART'), onPressed: _openCart),
       ),
     );
   }
@@ -292,8 +300,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       SnackBar(
         content: Text(
           limit != null
-              ? 'Maximum quantity allowed is $limit'
-              : 'Unable to add more of this product',
+              ? tr('Maximum quantity allowed is {0}', [limit])
+              : tr('Unable to add more of this product'),
         ),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,

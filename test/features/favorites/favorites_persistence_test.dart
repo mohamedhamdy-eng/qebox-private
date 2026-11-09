@@ -21,10 +21,7 @@ void main() {
     final firstViewModel = FavoritesViewModel(
       LocalFavoritesRepository(preferences),
     );
-    firstViewModel.addFavorite(
-      customerId: 'customer-a',
-      product: product,
-    );
+    firstViewModel.addFavorite(customerId: 'customer-a', product: product);
 
     final restoredViewModel = FavoritesViewModel(
       LocalFavoritesRepository(preferences),
@@ -34,9 +31,6 @@ void main() {
       restoredViewModel.state.favoritesForCustomer('customer-a'),
       hasLength(1),
     );
-    expect(
-      restoredViewModel.state.favoritesForCustomer('customer-b'),
-      isEmpty,
-    );
+    expect(restoredViewModel.state.favoritesForCustomer('customer-b'), isEmpty);
   });
 }

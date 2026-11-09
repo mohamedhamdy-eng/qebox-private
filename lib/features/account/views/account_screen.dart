@@ -11,6 +11,7 @@ import '../../orders/views/orders_screen.dart';
 import '../../rewards/views/rewards_screen.dart';
 import '../repositories/phone_auth_repository.dart';
 import '../viewmodels/customer_view_model.dart';
+import '../../../core/l10n/app_language.dart';
 
 part 'account_screen_auth.dart';
 part 'account_screen_profile.dart';
@@ -55,11 +56,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     final name = value?.trim() ?? '';
 
     if (name.isEmpty) {
-      return 'Please enter your full name';
+      return tr('Please enter your full name');
     }
 
     if (name.length < 3) {
-      return 'Please enter a valid name';
+      return tr('Please enter a valid name');
     }
 
     return null;
@@ -69,13 +70,13 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     final phone = value?.trim() ?? '';
 
     if (phone.isEmpty) {
-      return 'Please enter your mobile number';
+      return tr('Please enter your mobile number');
     }
 
     final phoneRegex = RegExp(r'^(010|011|012|015)[0-9]{8}$');
 
     if (!phoneRegex.hasMatch(phone)) {
-      return 'Please enter a valid Egyptian mobile number';
+      return tr('Please enter a valid Egyptian mobile number');
     }
 
     return null;
@@ -85,11 +86,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     final otp = value?.trim() ?? '';
 
     if (otp.isEmpty) {
-      return 'Please enter the verification code';
+      return tr('Please enter the verification code');
     }
 
     if (otp.length != 6) {
-      return 'Verification code must be 6 digits';
+      return tr('Verification code must be 6 digits');
     }
 
     return null;
@@ -107,21 +108,23 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       }
       switch (error.code) {
         case 'invalid-phone-number':
-          return 'The mobile number is invalid.';
+          return tr('The mobile number is invalid.');
         case 'invalid-verification-code':
-          return 'Invalid verification code.';
+          return tr('Invalid verification code.');
         case 'session-expired':
-          return 'The verification code expired. Please request a new one.';
+          return tr('The verification code expired. Please request a new one.');
         case 'too-many-requests':
-          return 'Too many attempts. Please try again later.';
+          return tr('Too many attempts. Please try again later.');
         case 'quota-exceeded':
-          return 'The SMS limit has been reached. Please try again tomorrow.';
+          return tr(
+            'The SMS limit has been reached. Please try again tomorrow.',
+          );
         case 'network-request-failed':
-          return 'Check your internet connection and try again.';
+          return tr('Check your internet connection and try again.');
       }
-      return error.message ?? 'Phone authentication failed.';
+      return error.message ?? tr('Phone authentication failed.');
     }
-    return 'Phone authentication failed. Please try again.';
+    return tr('Phone authentication failed. Please try again.');
   }
 
   // =====================================================
@@ -164,7 +167,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         _signInOtpSent = true;
         _signInVerificationId = session.verificationId;
       });
-      _showMessage('Verification code sent to $phone');
+      _showMessage(tr('Verification code sent to {0}', [phone]));
     } catch (error) {
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -195,7 +198,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     final verificationId = _signInVerificationId;
     if (verificationId == null) {
       setState(() => _isLoading = false);
-      _showMessage('Please request a new verification code.');
+      _showMessage(tr('Please request a new verification code.'));
       return;
     }
 
@@ -236,7 +239,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
     if (exists) {
       _showMessage(
-        'This mobile number already has an account. Please Sign In.',
+        tr('This mobile number already has an account. Please Sign In.'),
       );
       return;
     }
@@ -269,7 +272,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         _signUpOtpSent = true;
         _signUpVerificationId = session.verificationId;
       });
-      _showMessage('Verification code sent to $phone');
+      _showMessage(tr('Verification code sent to {0}', [phone]));
     } catch (error) {
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -300,7 +303,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     final verificationId = _signUpVerificationId;
     if (verificationId == null) {
       setState(() => _isLoading = false);
-      _showMessage('Please request a new verification code.');
+      _showMessage(tr('Please request a new verification code.'));
       return;
     }
 
@@ -406,6 +409,33 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
   // MESSAGE
   // =====================================================
 
+  Future<void> _chooseLanguage() async {
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+        title: Text(tr(tr('Language'))),
+        children: [
+          for (final (code, label) in [
+            ('device', tr(tr('Use device language'))),
+            ('en', 'English'),
+            ('ar', 'العربية'),
+          ])
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(dialogContext, code),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(label),
+              ),
+            ),
+        ],
+      ),
+    );
+    if (choice == null) return;
+    ref
+        .read(languageProvider.notifier)
+        .select(choice == 'device' ? null : Locale(choice));
+  }
+
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
@@ -445,8 +475,15 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
+        actions: [
+          IconButton(
+            tooltip: tr(tr('Language')),
+            icon: const Icon(Icons.language_rounded, color: Color(0xFF171717)),
+            onPressed: _chooseLanguage,
+          ),
+        ],
         title: Text(
-          customerState.isLoggedIn ? 'My Account' : 'Account',
+          customerState.isLoggedIn ? tr('My Account') : tr('Account'),
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w800,

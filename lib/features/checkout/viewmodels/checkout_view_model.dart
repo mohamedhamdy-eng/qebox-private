@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../repositories/coupon_repository.dart';
+import '../../../core/l10n/app_language.dart';
 
 enum PaymentMethod { cash, card, wallet }
 
@@ -31,7 +32,9 @@ class CheckoutState {
   String? promoMessageFor(double subtotal) {
     final applied = coupon;
     if (applied != null && subtotal < applied.minimumOrder) {
-      return 'Minimum order is EGP ${applied.minimumOrder.toStringAsFixed(0)}';
+      return tr('Minimum order is EGP {0}', [
+        applied.minimumOrder.toStringAsFixed(0),
+      ]);
     }
     return promoMessage;
   }
@@ -88,7 +91,7 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
     if (normalizedCode.isEmpty) {
       state = state.copyWith(
         clearCoupon: true,
-        promoMessage: 'Please enter a promo code',
+        promoMessage: tr('Please enter a promo code'),
       );
 
       return;
@@ -99,29 +102,30 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
       if (coupon == null) {
         state = state.copyWith(
           clearCoupon: true,
-          promoMessage: 'Invalid or inactive promo code',
+          promoMessage: tr('Invalid or inactive promo code'),
         );
         return;
       }
       if (subtotal < coupon.minimumOrder) {
         state = state.copyWith(
           clearCoupon: true,
-          promoMessage:
-              'Minimum order is EGP ${coupon.minimumOrder.toStringAsFixed(0)}',
+          promoMessage: tr('Minimum order is EGP {0}', [
+            coupon.minimumOrder.toStringAsFixed(0),
+          ]),
         );
         return;
       }
       state = state.copyWith(
         coupon: coupon,
         promoMessage: coupon.type == 'percentage'
-            ? '${coupon.value.toStringAsFixed(0)}% discount applied'
-            : 'EGP ${coupon.value.toStringAsFixed(0)} discount applied',
+            ? tr('{0}% discount applied', [coupon.value.toStringAsFixed(0)])
+            : tr('EGP {0} discount applied', [coupon.value.toStringAsFixed(0)]),
       );
       return;
     } catch (_) {
       state = state.copyWith(
         clearCoupon: true,
-        promoMessage: 'Could not validate promo code. Try again.',
+        promoMessage: tr('Could not validate promo code. Try again.'),
       );
       return;
     }

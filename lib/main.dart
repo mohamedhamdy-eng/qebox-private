@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,6 +9,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'core/l10n/app_language.dart';
 import 'core/theme/qebox_theme.dart';
 import 'core/config/app_environment.dart';
 import 'features/account/repositories/customer_repository.dart';
@@ -55,6 +57,7 @@ Future<void> main() async {
   runApp(
     ProviderScope(
       overrides: [
+        languageProvider.overrideWith((ref) => LanguageViewModel(preferences)),
         customerProvider.overrideWith(
           (ref) => CustomerViewModel(
             FirestoreCustomerRepository(
@@ -69,18 +72,14 @@ Future<void> main() async {
         ),
         cartProvider.overrideWith((ref) {
           final viewModel = CartViewModel(LocalCartRepository(preferences));
-          ref.listen<CatalogState>(
-            catalogProvider,
-            (previous, next) {
-              if (next.productsConfirmed && next.bundlesConfirmed) {
-                viewModel.syncWithCatalog(
-                  products: next.products,
-                  bundles: next.bundles,
-                );
-              }
-            },
-            fireImmediately: true,
-          );
+          ref.listen<CatalogState>(catalogProvider, (previous, next) {
+            if (next.productsConfirmed && next.bundlesConfirmed) {
+              viewModel.syncWithCatalog(
+                products: next.products,
+                bundles: next.bundles,
+              );
+            }
+          }, fireImmediately: true);
           return viewModel;
         }),
         addressProvider.overrideWith((ref) {
@@ -105,19 +104,13 @@ Future<void> main() async {
               auth: firebaseAuth,
             ),
           );
-          ref.listen<CustomerState>(
-            customerProvider,
-            (previous, next) {
-              unawaited(viewModel.syncCustomer(next.customer?.id));
-            },
-            fireImmediately: true,
-          );
+          ref.listen<CustomerState>(customerProvider, (previous, next) {
+            unawaited(viewModel.syncCustomer(next.customer?.id));
+          }, fireImmediately: true);
           return viewModel;
         }),
         onboardingProvider.overrideWith(
-          (ref) => OnboardingViewModel(
-            LocalOnboardingRepository(preferences),
-          ),
+          (ref) => OnboardingViewModel(LocalOnboardingRepository(preferences)),
         ),
         ordersProvider.overrideWith((ref) {
           final viewModel = OrdersViewModel(
@@ -157,10 +150,7 @@ Future<FirebaseApp> _initializeFirebase() async {
     for (final app in Firebase.apps) {
       if (app.name == developmentAppName) return app;
     }
-    return Firebase.initializeApp(
-      name: developmentAppName,
-      options: options,
-    );
+    return Firebase.initializeApp(name: developmentAppName, options: options);
   }
 
   return Firebase.initializeApp(options: options);
@@ -176,13 +166,16 @@ class QeboxPrivateApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       title: 'Qebox Private',
       theme: buildQeboxTheme(),
-      builder: (context, child) => QBotLauncher(
-        navigatorKey: rootNavigatorKey,
-        child: child ?? const SizedBox.shrink(),
+      locale: ref.watch(languageProvider),
+      supportedLocales: supportedAppLocales,
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      builder: (context, child) => LanguageScope(
+        child: QBotLauncher(
+          navigatorKey: rootNavigatorKey,
+          child: child ?? const SizedBox.shrink(),
+        ),
       ),
-      home: SplashScreen(
-        onboardingCompleted: ref.watch(onboardingProvider),
-      ),
+      home: SplashScreen(onboardingCompleted: ref.watch(onboardingProvider)),
     );
   }
 }

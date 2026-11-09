@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../core/l10n/app_language.dart';
 import '../models/order.dart';
 
 /// [message] is safe to show to the customer.
@@ -95,14 +96,27 @@ class FirestoreOrdersRepository implements OrdersRepository {
       await _functions.httpsCallable(name).call<Object?>(data);
     } on FirebaseFunctionsException catch (error) {
       throw OrderSubmissionException(switch (error.code) {
-        'failed-precondition' || 'invalid-argument' || 'already-exists' =>
-          error.message ?? 'Please review your order and try again.',
-        'unauthenticated' => 'Please sign in again and try once more.',
-        _ => _connectionError,
+        'failed-precondition' ||
+        'invalid-argument' ||
+        'already-exists' => _serverMessage(error),
+        'unauthenticated' => tr('Please sign in again and try once more.'),
+        _ => tr(_connectionError),
       });
     } on Exception {
-      throw const OrderSubmissionException(_connectionError);
+      throw OrderSubmissionException(tr(_connectionError));
     }
+  }
+
+  String _serverMessage(FirebaseFunctionsException error) {
+    final details = error.details;
+    if (details is Map && details['template'] is String) {
+      final args = details['args'];
+      return tr(
+        details['template'] as String,
+        args is List ? args.cast<Object?>() : const [],
+      );
+    }
+    return tr(error.message ?? 'Please review your order and try again.');
   }
 
   static const _connectionError =

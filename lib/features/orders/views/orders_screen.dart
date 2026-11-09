@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/order.dart';
 import '../viewmodels/orders_view_model.dart';
 import 'order_details_screen.dart';
+import '../../../core/l10n/app_language.dart';
 
 class OrdersScreen extends ConsumerWidget {
   const OrdersScreen({super.key});
@@ -33,14 +34,11 @@ class OrdersScreen extends ConsumerWidget {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          icon: const Icon(
-            Icons.arrow_back_rounded,
-            color: Color(0xFF171717),
-          ),
+          icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF171717)),
         ),
-        title: const Text(
-          'Orders',
-          style: TextStyle(
+        title: Text(
+          tr('Orders'),
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w800,
             color: Color(0xFF171717),
@@ -50,30 +48,24 @@ class OrdersScreen extends ConsumerWidget {
       body: orders.isEmpty
           ? const _EmptyOrders()
           : ListView(
-              padding: const EdgeInsets.fromLTRB(
-                20,
-                16,
-                20,
-                30,
-              ),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
               children: [
                 // =========================================
                 // ACTIVE ORDERS
                 // =========================================
-
                 if (activeOrders.isNotEmpty) ...[
-                  const Text(
-                    'Active orders',
-                    style: TextStyle(
+                  Text(
+                    tr('Active orders'),
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF171717),
                     ),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
-                    'Track your current orders and delivery status.',
-                    style: TextStyle(
+                  Text(
+                    tr('Track your current orders and delivery status.'),
+                    style: const TextStyle(
                       fontSize: 12,
                       color: Color(0xFF777777),
                     ),
@@ -81,12 +73,8 @@ class OrdersScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   ...activeOrders.map(
                     (order) => Padding(
-                      padding: const EdgeInsets.only(
-                        bottom: 14,
-                      ),
-                      child: _OrderCard(
-                        order: order,
-                      ),
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: _OrderCard(order: order),
                     ),
                   ),
                 ],
@@ -94,27 +82,25 @@ class OrdersScreen extends ConsumerWidget {
                 // =========================================
                 // SPACE BETWEEN SECTIONS
                 // =========================================
-
                 if (activeOrders.isNotEmpty && previousOrders.isNotEmpty)
                   const SizedBox(height: 20),
 
                 // =========================================
                 // PREVIOUS ORDERS
                 // =========================================
-
                 if (previousOrders.isNotEmpty) ...[
-                  const Text(
-                    'Previous orders',
-                    style: TextStyle(
+                  Text(
+                    tr('Previous orders'),
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF171717),
                     ),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
-                    'Your delivered and cancelled orders.',
-                    style: TextStyle(
+                  Text(
+                    tr('Your delivered and cancelled orders.'),
+                    style: const TextStyle(
                       fontSize: 12,
                       color: Color(0xFF777777),
                     ),
@@ -122,12 +108,8 @@ class OrdersScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   ...previousOrders.map(
                     (order) => Padding(
-                      padding: const EdgeInsets.only(
-                        bottom: 14,
-                      ),
-                      child: _OrderCard(
-                        order: order,
-                      ),
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: _OrderCard(order: order),
                     ),
                   ),
                 ],
@@ -144,24 +126,18 @@ class OrdersScreen extends ConsumerWidget {
 class _OrderCard extends StatelessWidget {
   final CustomerOrder order;
 
-  const _OrderCard({
-    required this.order,
-  });
+  const _OrderCard({required this.order});
 
   @override
   Widget build(BuildContext context) {
-    final status = _getStatus(
-      order.status,
-    );
+    final status = _getStatus(order.status);
 
     return InkWell(
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) {
-              return OrderDetailsScreen(
-                order: order,
-              );
+              return OrderDetailsScreen(order: order);
             },
           ),
         );
@@ -180,7 +156,6 @@ class _OrderCard extends StatelessWidget {
             // =============================================
             // ORDER ID + STATUS
             // =============================================
-
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -201,9 +176,9 @@ class _OrderCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Order',
-                        style: TextStyle(
+                      Text(
+                        tr('Order'),
+                        style: const TextStyle(
                           fontSize: 11,
                           color: Color(0xFF777777),
                         ),
@@ -246,16 +221,13 @@ class _OrderCard extends StatelessWidget {
 
             const SizedBox(height: 18),
 
-            const Divider(
-              height: 1,
-            ),
+            const Divider(height: 1),
 
             const SizedBox(height: 18),
 
             // =============================================
             // DELIVERY TIME
             // =============================================
-
             Row(
               children: [
                 const Icon(
@@ -282,7 +254,6 @@ class _OrderCard extends StatelessWidget {
             // =============================================
             // ADDRESS
             // =============================================
-
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -294,7 +265,7 @@ class _OrderCard extends StatelessWidget {
                 const SizedBox(width: 9),
                 Expanded(
                   child: Text(
-                    '${order.addressLabel} • ${order.addressLine}',
+                    '${tr(order.addressLabel)} • ${order.addressLine}',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -312,12 +283,11 @@ class _OrderCard extends StatelessWidget {
             // =============================================
             // ITEMS + TOTAL
             // =============================================
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '${_totalItems(order)} items',
+                  tr('{0} items', [_totalItems(order)]),
                   style: const TextStyle(
                     fontSize: 12,
                     color: Color(0xFF777777),
@@ -326,7 +296,7 @@ class _OrderCard extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      'EGP ${order.total.toStringAsFixed(2)}',
+                      tr('EGP {0}', [order.total.toStringAsFixed(2)]),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w900,
@@ -353,24 +323,17 @@ class _OrderCard extends StatelessWidget {
   // TOTAL ITEMS
   // =============================================
 
-  static int _totalItems(
-    CustomerOrder order,
-  ) {
-    return order.items.fold(
-      0,
-      (total, item) {
-        return total + item.quantity;
-      },
-    );
+  static int _totalItems(CustomerOrder order) {
+    return order.items.fold(0, (total, item) {
+      return total + item.quantity;
+    });
   }
 
   // =============================================
   // DELIVERY TEXT
   // =============================================
 
-  static String _deliveryText(
-    CustomerOrder order,
-  ) {
+  static String _deliveryText(CustomerOrder order) {
     return '${_dateText(order.deliveryStart)} • '
         '${_timeText(order.deliveryStart)} – '
         '${_timeText(order.deliveryEnd)}';
@@ -380,48 +343,27 @@ class _OrderCard extends StatelessWidget {
   // DATE TEXT
   // =============================================
 
-  static String _dateText(
-    DateTime date,
-  ) {
+  static String _dateText(DateTime date) {
     final now = DateTime.now();
 
-    final today = DateTime(
-      now.year,
-      now.month,
-      now.day,
-    );
+    final today = DateTime(now.year, now.month, now.day);
 
-    final tomorrow = today.add(
-      const Duration(days: 1),
-    );
+    final tomorrow = today.add(const Duration(days: 1));
 
-    final selected = DateTime(
-      date.year,
-      date.month,
-      date.day,
-    );
+    final selected = DateTime(date.year, date.month, date.day);
 
-    if (_sameDate(
-      selected,
-      today,
-    )) {
-      return 'Today';
+    if (_sameDate(selected, today)) {
+      return tr('Today');
     }
 
-    if (_sameDate(
-      selected,
-      tomorrow,
-    )) {
-      return 'Tomorrow';
+    if (_sameDate(selected, tomorrow)) {
+      return tr('Tomorrow');
     }
 
     return '${date.day} ${_monthName(date.month)}';
   }
 
-  static bool _sameDate(
-    DateTime first,
-    DateTime second,
-  ) {
+  static bool _sameDate(DateTime first, DateTime second) {
     return first.year == second.year &&
         first.month == second.month &&
         first.day == second.day;
@@ -431,10 +373,8 @@ class _OrderCard extends StatelessWidget {
   // TIME TEXT
   // =============================================
 
-  static String _timeText(
-    DateTime date,
-  ) {
-    final period = date.hour >= 12 ? 'PM' : 'AM';
+  static String _timeText(DateTime date) {
+    final period = date.hour >= 12 ? tr('PM') : tr('AM');
 
     var hour = date.hour % 12;
 
@@ -449,9 +389,7 @@ class _OrderCard extends StatelessWidget {
   // MONTH TEXT
   // =============================================
 
-  static String _monthName(
-    int month,
-  ) {
+  static String _monthName(int month) {
     const months = [
       'Jan',
       'Feb',
@@ -467,64 +405,62 @@ class _OrderCard extends StatelessWidget {
       'Dec',
     ];
 
-    return months[month - 1];
+    return tr(months[month - 1]);
   }
 
   // =============================================
   // STATUS STYLE
   // =============================================
 
-  static _StatusStyle _getStatus(
-    OrderStatus status,
-  ) {
+  static _StatusStyle _getStatus(OrderStatus status) {
     switch (status) {
       case OrderStatus.placed:
-        return const _StatusStyle(
-          label: 'Order received',
-          backgroundColor: Color(0xFFFFE6D5),
-          textColor: Color(0xFFEE7424),
+        return _StatusStyle(
+          label: tr('Order received'),
+          backgroundColor: const Color(0xFFFFE6D5),
+          textColor: const Color(0xFFEE7424),
         );
 
       case OrderStatus.scheduled:
-        return const _StatusStyle(
-          label: 'Scheduled',
-          backgroundColor: Color(0xFFFFE6D5),
-          textColor: Color(0xFFEE7424),
+        return _StatusStyle(
+          label: tr('Scheduled'),
+          backgroundColor: const Color(0xFFFFE6D5),
+          textColor: const Color(0xFFEE7424),
         );
 
       case OrderStatus.preparing:
-        return const _StatusStyle(
-          label: 'Preparing',
-          backgroundColor: Color(0xFFFFF4D6),
-          textColor: Color(0xFF9A6A00),
+        return _StatusStyle(
+          label: tr('Preparing'),
+          backgroundColor: const Color(0xFFFFF4D6),
+          textColor: const Color(0xFF9A6A00),
         );
 
       case OrderStatus.driverAssigned:
-        return const _StatusStyle(
-          label: 'Driver assigned',
-          backgroundColor: Color(0xFFE8F0FF),
-          textColor: Color(0xFF315EAD),
+        return _StatusStyle(
+          label: tr('Driver assigned'),
+          backgroundColor: const Color(0xFFE8F0FF),
+          textColor: const Color(0xFF315EAD),
         );
 
       case OrderStatus.outForDelivery:
-        return const _StatusStyle(
-          label: 'Out for delivery',
-          backgroundColor: Color(0xFFE8F0FF),
-          textColor: Color(0xFF315EAD),
+        return _StatusStyle(
+          label: tr('Out for delivery'),
+          backgroundColor: const Color(0xFFE8F0FF),
+          textColor: const Color(0xFF315EAD),
         );
 
       case OrderStatus.delivered:
-        return const _StatusStyle(
-          label: 'Delivered',
-          backgroundColor: Color(0xFFE8F5E9),
-          textColor: Color(0xFF2E7D32),
+        return _StatusStyle(
+          label: tr('Delivered'),
+          backgroundColor: const Color(0xFFE8F5E9),
+          textColor: const Color(0xFF2E7D32),
         );
 
       case OrderStatus.cancelled:
-        return const _StatusStyle(
-          label: 'Cancelled',
-          backgroundColor: Color(0xFFFFE8E8),
-          textColor: Color(0xFFE53935),
+        return _StatusStyle(
+          label: tr('Cancelled'),
+          backgroundColor: const Color(0xFFFFE8E8),
+          textColor: const Color(0xFFE53935),
         );
     }
   }
@@ -555,32 +491,32 @@ class _EmptyOrders extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(30),
+        padding: const EdgeInsets.all(30),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.receipt_long_outlined,
               size: 90,
               color: Color(0xFFCCCCCC),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(
-              'No orders yet',
+              tr('No orders yet'),
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
                 color: Color(0xFF171717),
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
-              'Your orders will appear here after you place them.',
+              tr('Your orders will appear here after you place them.'),
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 13,
                 height: 1.5,
                 color: Color(0xFF777777),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/qebox_theme.dart';
 import '../models/product.dart';
+import '../../../core/l10n/app_language.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -101,9 +102,9 @@ class ProductCard extends StatelessWidget {
                         color: const Color(0xFFEE7424),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text(
-                        'NEW',
-                        style: TextStyle(
+                      child: Text(
+                        tr('NEW'),
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 9,
                           fontWeight: FontWeight.w800,
@@ -140,7 +141,7 @@ class ProductCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              product.name,
+              product.displayName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -154,7 +155,7 @@ class ProductCard extends StatelessWidget {
               children: [
                 Flexible(
                   child: Text(
-                    'EGP ${product.price.toStringAsFixed(0)}',
+                    tr('EGP {0}', [product.price.toStringAsFixed(0)]),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -168,7 +169,7 @@ class ProductCard extends StatelessWidget {
                   const SizedBox(width: 6),
                   Flexible(
                     child: Text(
-                      'EGP ${product.oldPrice!.toStringAsFixed(0)}',
+                      tr('EGP {0}', [product.oldPrice!.toStringAsFixed(0)]),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -209,9 +210,9 @@ class ProductCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
         ),
-        child: const Text(
-          'Add to cart',
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+        child: Text(
+          tr('Add to cart'),
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
         ),
       ),
     );
@@ -268,9 +269,9 @@ class ProductCard extends StatelessWidget {
         color: const Color(0xFFCCCCCC),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: const Text(
-        'Out of stock',
-        style: TextStyle(
+      child: Text(
+        tr('Out of stock'),
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 12,
           fontWeight: FontWeight.w700,

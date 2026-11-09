@@ -32,9 +32,12 @@ extension _OrderDetailsSections on OrderDetailsScreen {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Order number',
-                    style: TextStyle(fontSize: 11, color: Color(0xFF777777)),
+                  Text(
+                    tr('Order number'),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF777777),
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -81,7 +84,7 @@ extension _OrderDetailsSections on OrderDetailsScreen {
             borderRadius: BorderRadius.circular(18),
           ),
           child: Text(
-            'Cancellation reason: ${order.cancellationReason}',
+            tr('Cancellation reason: {0}', [order.cancellationReason]),
             style: TextStyle(color: Colors.red.shade800),
           ),
         ),
@@ -96,9 +99,9 @@ extension _OrderDetailsSections on OrderDetailsScreen {
       // =====================================================
       // ORDER JOURNEY
       // =====================================================
-      const Text(
-        'Order journey',
-        style: TextStyle(
+      Text(
+        tr('Order journey'),
+        style: const TextStyle(
           fontSize: 19,
           fontWeight: FontWeight.w800,
           color: Color(0xFF171717),
@@ -107,9 +110,9 @@ extension _OrderDetailsSections on OrderDetailsScreen {
 
       const SizedBox(height: 6),
 
-      const Text(
-        'Follow the progress of your order.',
-        style: TextStyle(fontSize: 12, color: Color(0xFF777777)),
+      Text(
+        tr('Follow the progress of your order.'),
+        style: const TextStyle(fontSize: 12, color: Color(0xFF777777)),
       ),
 
       const SizedBox(height: 14),
@@ -124,25 +127,25 @@ extension _OrderDetailsSections on OrderDetailsScreen {
         child: Column(
           children: [
             _JourneyStep(
-              title: 'Order received',
+              title: tr('Order received'),
               completed: _isStepCompleted(order.status, OrderStatus.placed),
               current: order.status == OrderStatus.placed,
               isLast: false,
             ),
             _JourneyStep(
-              title: 'Scheduled',
+              title: tr('Scheduled'),
               completed: _isStepCompleted(order.status, OrderStatus.scheduled),
               current: order.status == OrderStatus.scheduled,
               isLast: false,
             ),
             _JourneyStep(
-              title: 'Preparing',
+              title: tr('Preparing'),
               completed: _isStepCompleted(order.status, OrderStatus.preparing),
               current: order.status == OrderStatus.preparing,
               isLast: false,
             ),
             _JourneyStep(
-              title: 'Driver assigned',
+              title: tr('Driver assigned'),
               completed: _isStepCompleted(
                 order.status,
                 OrderStatus.driverAssigned,
@@ -151,7 +154,7 @@ extension _OrderDetailsSections on OrderDetailsScreen {
               isLast: false,
             ),
             _JourneyStep(
-              title: 'Out for delivery',
+              title: tr('Out for delivery'),
               completed: _isStepCompleted(
                 order.status,
                 OrderStatus.outForDelivery,
@@ -160,7 +163,7 @@ extension _OrderDetailsSections on OrderDetailsScreen {
               isLast: false,
             ),
             _JourneyStep(
-              title: 'Delivered',
+              title: tr('Delivered'),
               completed: order.status == OrderStatus.delivered,
               current: order.status == OrderStatus.delivered,
               isLast: true,
@@ -178,14 +181,14 @@ extension _OrderDetailsSections on OrderDetailsScreen {
             color: const Color(0xFFFFE8E8),
             borderRadius: BorderRadius.circular(18),
           ),
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.cancel_outlined, color: Color(0xFFE53935)),
-              SizedBox(width: 10),
+              const Icon(Icons.cancel_outlined, color: Color(0xFFE53935)),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'This order has been cancelled.',
-                  style: TextStyle(
+                  tr('This order has been cancelled.'),
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFFE53935),
@@ -206,9 +209,9 @@ extension _OrderDetailsSections on OrderDetailsScreen {
       // =====================================================
       // CUSTOMER DETAILS
       // =====================================================
-      const Text(
-        'Customer details',
-        style: TextStyle(
+      Text(
+        tr('Customer details'),
+        style: const TextStyle(
           fontSize: 19,
           fontWeight: FontWeight.w800,
           color: Color(0xFF171717),
@@ -228,9 +231,9 @@ extension _OrderDetailsSections on OrderDetailsScreen {
           children: [
             _InfoRow(
               icon: Icons.person_outline_rounded,
-              title: 'Full name',
+              title: tr('Full name'),
               value: order.customerName.trim().isEmpty
-                  ? 'Not available'
+                  ? tr('Not available')
                   : order.customerName,
             ),
             const Padding(
@@ -239,9 +242,9 @@ extension _OrderDetailsSections on OrderDetailsScreen {
             ),
             _InfoRow(
               icon: Icons.phone_outlined,
-              title: 'Mobile number',
+              title: tr('Mobile number'),
               value: order.customerPhone.trim().isEmpty
-                  ? 'Not available'
+                  ? tr('Not available')
                   : order.customerPhone,
             ),
             const Padding(
@@ -250,9 +253,9 @@ extension _OrderDetailsSections on OrderDetailsScreen {
             ),
             _InfoRow(
               icon: Icons.badge_outlined,
-              title: 'Customer ID',
+              title: tr('Customer ID'),
               value: order.customerId.trim().isEmpty
-                  ? 'Not available'
+                  ? tr('Not available')
                   : order.customerId,
             ),
           ],
@@ -268,9 +271,9 @@ extension _OrderDetailsSections on OrderDetailsScreen {
       // =====================================================
       // DELIVERY
       // =====================================================
-      const Text(
-        'Delivery',
-        style: TextStyle(
+      Text(
+        tr('Delivery'),
+        style: const TextStyle(
           fontSize: 19,
           fontWeight: FontWeight.w800,
           color: Color(0xFF171717),
@@ -290,7 +293,7 @@ extension _OrderDetailsSections on OrderDetailsScreen {
           children: [
             _InfoRow(
               icon: Icons.schedule_outlined,
-              title: 'Delivery time',
+              title: tr('Delivery time'),
               value: _deliveryText(order),
             ),
             const Padding(
@@ -299,7 +302,7 @@ extension _OrderDetailsSections on OrderDetailsScreen {
             ),
             _InfoRow(
               icon: Icons.location_on_outlined,
-              title: 'Delivery address',
+              title: tr('Delivery address'),
               value: _addressText(order),
             ),
             const Padding(
@@ -308,8 +311,8 @@ extension _OrderDetailsSections on OrderDetailsScreen {
             ),
             _InfoRow(
               icon: Icons.delivery_dining_outlined,
-              title: 'Delivery instruction',
-              value: order.deliveryInstruction,
+              title: tr('Delivery instruction'),
+              value: tr(order.deliveryInstruction),
             ),
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
@@ -317,7 +320,7 @@ extension _OrderDetailsSections on OrderDetailsScreen {
             ),
             _InfoRow(
               icon: Icons.swap_horiz_rounded,
-              title: 'Out-of-stock preference',
+              title: tr('Out-of-stock preference'),
               value: _substitutionLabel(order.substitutionPreference),
             ),
           ],
@@ -336,16 +339,16 @@ extension _OrderDetailsSections on OrderDetailsScreen {
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'Items',
-            style: TextStyle(
+          Text(
+            tr('Items'),
+            style: const TextStyle(
               fontSize: 19,
               fontWeight: FontWeight.w800,
               color: Color(0xFF171717),
             ),
           ),
           Text(
-            '${_totalItems(order)} items',
+            tr('{0} items', [_totalItems(order)]),
             style: const TextStyle(fontSize: 12, color: Color(0xFF777777)),
           ),
         ],
@@ -411,7 +414,7 @@ extension _OrderDetailsSections on OrderDetailsScreen {
                           ),
                           const SizedBox(height: 5),
                           Text(
-                            'Qty: ${item.quantity}',
+                            tr('Qty: {0}', [item.quantity]),
                             style: const TextStyle(
                               fontSize: 11,
                               color: Color(0xFF777777),
@@ -425,7 +428,7 @@ extension _OrderDetailsSections on OrderDetailsScreen {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          'EGP ${item.total.toStringAsFixed(2)}',
+                          tr('EGP {0}', [item.total.toStringAsFixed(2)]),
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w800,
@@ -434,7 +437,7 @@ extension _OrderDetailsSections on OrderDetailsScreen {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'EGP ${item.price.toStringAsFixed(2)} each',
+                          tr('EGP {0} each', [item.price.toStringAsFixed(2)]),
                           style: const TextStyle(
                             fontSize: 9,
                             color: Color(0xFF999999),
@@ -464,9 +467,9 @@ extension _OrderDetailsSections on OrderDetailsScreen {
       // =====================================================
       // PAYMENT
       // =====================================================
-      const Text(
-        'Payment',
-        style: TextStyle(
+      Text(
+        tr('Payment'),
+        style: const TextStyle(
           fontSize: 19,
           fontWeight: FontWeight.w800,
           color: Color(0xFF171717),
@@ -484,7 +487,7 @@ extension _OrderDetailsSections on OrderDetailsScreen {
         ),
         child: _InfoRow(
           icon: Icons.payments_outlined,
-          title: 'Payment method',
+          title: tr('Payment method'),
           value: _paymentText(order.paymentMethod),
         ),
       ),
@@ -498,9 +501,9 @@ extension _OrderDetailsSections on OrderDetailsScreen {
       // =====================================================
       if (order.orderNote != null && order.orderNote!.trim().isNotEmpty) ...[
         const SizedBox(height: 24),
-        const Text(
-          'Order notes',
-          style: TextStyle(
+        Text(
+          tr('Order notes'),
+          style: const TextStyle(
             fontSize: 19,
             fontWeight: FontWeight.w800,
             color: Color(0xFF171717),
@@ -543,9 +546,9 @@ extension _OrderDetailsSections on OrderDetailsScreen {
       // =====================================================
       // ORDER SUMMARY
       // =====================================================
-      const Text(
-        'Order summary',
-        style: TextStyle(
+      Text(
+        tr('Order summary'),
+        style: const TextStyle(
           fontSize: 19,
           fontWeight: FontWeight.w800,
           color: Color(0xFF171717),
@@ -564,29 +567,29 @@ extension _OrderDetailsSections on OrderDetailsScreen {
         child: Column(
           children: [
             _SummaryRow(
-              title: 'Subtotal',
-              value: 'EGP ${order.subtotal.toStringAsFixed(2)}',
+              title: tr('Subtotal'),
+              value: tr('EGP {0}', [order.subtotal.toStringAsFixed(2)]),
             ),
             if (order.discount > 0) ...[
               const SizedBox(height: 12),
               _SummaryRow(
-                title: 'Discount',
-                value: '- EGP ${order.discount.toStringAsFixed(2)}',
+                title: tr('Discount'),
+                value: tr('- EGP {0}', [order.discount.toStringAsFixed(2)]),
                 isDiscount: true,
               ),
             ],
             const SizedBox(height: 12),
             _SummaryRow(
-              title: 'Delivery fee',
-              value: 'EGP ${order.deliveryFee.toStringAsFixed(2)}',
+              title: tr('Delivery fee'),
+              value: tr('EGP {0}', [order.deliveryFee.toStringAsFixed(2)]),
             ),
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
               child: Divider(height: 1),
             ),
             _SummaryRow(
-              title: 'Total',
-              value: 'EGP ${order.total.toStringAsFixed(2)}',
+              title: tr('Total'),
+              value: tr('EGP {0}', [order.total.toStringAsFixed(2)]),
               isTotal: true,
             ),
           ],

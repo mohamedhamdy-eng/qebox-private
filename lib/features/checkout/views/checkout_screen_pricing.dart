@@ -11,13 +11,13 @@ extension _CheckoutPricingSections on _CheckoutScreenState {
       // ==================================
       // SAVE ON YOUR ORDER
       // ==================================
-      const _SectionTitle(title: 'Save on your order'),
+      _SectionTitle(title: tr('Save on your order')),
 
       const SizedBox(height: 6),
 
-      const Text(
-        'Have a promo code? Apply it here.',
-        style: TextStyle(fontSize: 12, color: Color(0xFF777777)),
+      Text(
+        tr('Have a promo code? Apply it here.'),
+        style: const TextStyle(fontSize: 12, color: Color(0xFF777777)),
       ),
 
       const SizedBox(height: 14),
@@ -38,7 +38,7 @@ extension _CheckoutPricingSections on _CheckoutScreenState {
                     enabled: checkoutState.promoCode.isEmpty,
                     textCapitalization: TextCapitalization.characters,
                     decoration: InputDecoration(
-                      hintText: 'Enter promo code',
+                      hintText: tr('Enter promo code'),
                       prefixIcon: const Icon(
                         Icons.local_offer_outlined,
                         color: Color(0xFFEE7424),
@@ -91,7 +91,9 @@ extension _CheckoutPricingSections on _CheckoutScreenState {
                       ),
                     ),
                     child: Text(
-                      checkoutState.promoCode.isEmpty ? 'Apply' : 'Remove',
+                      checkoutState.promoCode.isEmpty
+                          ? tr('Apply')
+                          : tr('Remove'),
                       style: const TextStyle(fontWeight: FontWeight.w800),
                     ),
                   ),
@@ -101,7 +103,7 @@ extension _CheckoutPricingSections on _CheckoutScreenState {
             if (promoMessage != null) ...[
               const SizedBox(height: 10),
               Align(
-                alignment: Alignment.centerLeft,
+                alignment: AlignmentDirectional.centerStart,
                 child: Text(
                   promoMessage,
                   style: TextStyle(
@@ -127,20 +129,20 @@ extension _CheckoutPricingSections on _CheckoutScreenState {
       // ==================================
       // PAYMENT METHOD
       // ==================================
-      const _SectionTitle(title: 'Payment method'),
+      _SectionTitle(title: tr('Payment method')),
 
       const SizedBox(height: 6),
 
-      const Text(
-        'Qebox currently accepts cash on delivery.',
-        style: TextStyle(fontSize: 12, color: Color(0xFF777777)),
+      Text(
+        tr('Qebox currently accepts cash on delivery.'),
+        style: const TextStyle(fontSize: 12, color: Color(0xFF777777)),
       ),
 
       const SizedBox(height: 14),
 
       _PaymentOption(
-        title: 'Cash on delivery',
-        subtitle: 'Pay when your order arrives',
+        title: tr('Cash on delivery'),
+        subtitle: tr('Pay when your order arrives'),
         icon: Icons.payments_outlined,
         selected: checkoutState.paymentMethod == PaymentMethod.cash,
         onTap: () {
@@ -159,7 +161,7 @@ extension _CheckoutPricingSections on _CheckoutScreenState {
       // ==================================
       // ORDER NOTES
       // ==================================
-      const _SectionTitle(title: 'Order notes'),
+      _SectionTitle(title: tr('Order notes')),
 
       const SizedBox(height: 14),
 
@@ -171,14 +173,17 @@ extension _CheckoutPricingSections on _CheckoutScreenState {
           borderRadius: BorderRadius.circular(22),
         ),
         child: orderNote.trim().isEmpty
-            ? const Row(
+            ? Row(
                 children: [
-                  Icon(Icons.notes_rounded, color: Color(0xFF999999)),
-                  SizedBox(width: 12),
+                  const Icon(Icons.notes_rounded, color: Color(0xFF999999)),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'No order notes added',
-                      style: TextStyle(fontSize: 13, color: Color(0xFF777777)),
+                      tr('No order notes added'),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF777777),
+                      ),
                     ),
                   ),
                 ],
@@ -215,7 +220,7 @@ extension _CheckoutPricingSections on _CheckoutScreenState {
       // ==================================
       // ORDER SUMMARY
       // ==================================
-      const _SectionTitle(title: 'Order summary'),
+      _SectionTitle(title: tr('Order summary')),
 
       const SizedBox(height: 14),
 
@@ -229,26 +234,26 @@ extension _CheckoutPricingSections on _CheckoutScreenState {
         child: Column(
           children: [
             _SummaryRow(
-              title: 'Subtotal',
-              value: 'EGP ${subtotal.toStringAsFixed(2)}',
+              title: tr('Subtotal'),
+              value: tr('EGP {0}', [subtotal.toStringAsFixed(2)]),
             ),
             if (discount > 0) ...[
               const SizedBox(height: 12),
               _SummaryRow(
-                title: 'Discount',
-                value: '- EGP ${discount.toStringAsFixed(2)}',
+                title: tr('Discount'),
+                value: tr('- EGP {0}', [discount.toStringAsFixed(2)]),
                 isDiscount: true,
               ),
             ],
             const SizedBox(height: 12),
-            const _SummaryRow(title: 'Delivery fee', value: 'EGP 20.00'),
+            _SummaryRow(title: tr('Delivery fee'), value: tr('EGP 20.00')),
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
               child: Divider(height: 1),
             ),
             _SummaryRow(
-              title: 'Total',
-              value: 'EGP ${total.toStringAsFixed(2)}',
+              title: tr('Total'),
+              value: tr('EGP {0}', [total.toStringAsFixed(2)]),
               isTotal: true,
             ),
           ],

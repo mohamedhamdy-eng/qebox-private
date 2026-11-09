@@ -79,7 +79,7 @@ void main() {
     final cartViewModel = build(cart: const [CartItem(product: _milk)]);
     await cartViewModel.send('السلة');
     expect(assistant.calls, 0);
-    expect(cartViewModel.state.messages.last.text, contains('Fresh Milk'));
+    expect(cartViewModel.state.messages.last.text, contains('لبن'));
   });
 
   test('understands Arabic digits and the attached article', () async {
@@ -88,6 +88,16 @@ void main() {
     await viewModel.send('ضيف ٢ اللبن');
 
     expect(added, ['milk', 'milk']);
+  });
+
+  test('answers in the language of the message', () async {
+    final arabic = build();
+    await arabic.send('ضيف لبن');
+    expect(arabic.state.messages.last.text, contains('تمت إضافة'));
+
+    final english = build();
+    await english.send('add fresh milk');
+    expect(english.state.messages.last.text, contains('Added'));
   });
 
   test('adds a partial name only after an explicit request', () async {

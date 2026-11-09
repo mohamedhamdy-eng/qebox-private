@@ -23,9 +23,9 @@ extension _AccountAuthViews on _AccountScreenState {
 
           const SizedBox(height: 22),
 
-          const Text(
-            'Welcome to Qebox',
-            style: TextStyle(
+          Text(
+            tr('Welcome to Qebox'),
+            style: const TextStyle(
               fontSize: 27,
               fontWeight: FontWeight.w800,
               color: Color(0xFF171717),
@@ -34,9 +34,9 @@ extension _AccountAuthViews on _AccountScreenState {
 
           const SizedBox(height: 8),
 
-          const Text(
-            'Sign in to your account or create a new one.',
-            style: TextStyle(
+          Text(
+            tr('Sign in to your account or create a new one.'),
+            style: const TextStyle(
               fontSize: 13,
               color: Color(0xFF777777),
               height: 1.4,
@@ -58,7 +58,7 @@ extension _AccountAuthViews on _AccountScreenState {
               children: [
                 Expanded(
                   child: _AuthTab(
-                    title: 'Sign In',
+                    title: tr('Sign In'),
                     selected: !_isSignUp,
                     onTap: () {
                       _applyState(() {
@@ -69,7 +69,7 @@ extension _AccountAuthViews on _AccountScreenState {
                 ),
                 Expanded(
                   child: _AuthTab(
-                    title: 'Sign Up',
+                    title: tr('Sign Up'),
                     selected: _isSignUp,
                     onTap: () {
                       _applyState(() {
@@ -98,9 +98,9 @@ extension _AccountAuthViews on _AccountScreenState {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Mobile number',
-            style: TextStyle(
+          Text(
+            tr('Mobile number'),
+            style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
               color: Color(0xFF171717),
@@ -125,7 +125,7 @@ extension _AccountAuthViews on _AccountScreenState {
           if (!_signInOtpSent) ...[
             const SizedBox(height: 22),
             _MainButton(
-              title: 'Send verification code',
+              title: tr('Send verification code'),
               loading: _isLoading,
               onPressed: _sendSignInOtp,
             ),
@@ -139,9 +139,9 @@ extension _AccountAuthViews on _AccountScreenState {
           ],
           if (_signInOtpSent) ...[
             const SizedBox(height: 20),
-            const Text(
-              'Verification code',
-              style: TextStyle(
+            Text(
+              tr('Verification code'),
+              style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF171717),
@@ -164,7 +164,7 @@ extension _AccountAuthViews on _AccountScreenState {
             ),
             const SizedBox(height: 22),
             _MainButton(
-              title: 'Sign In',
+              title: tr('Sign In'),
               loading: _isLoading,
               onPressed: _verifySignIn,
             ),
@@ -177,9 +177,9 @@ extension _AccountAuthViews on _AccountScreenState {
                     _signInOtpController.clear();
                   });
                 },
-                child: const Text(
-                  'Change mobile number',
-                  style: TextStyle(
+                child: Text(
+                  tr('Change mobile number'),
+                  style: const TextStyle(
                     color: Color(0xFFEE7424),
                     fontWeight: FontWeight.w700,
                   ),
@@ -198,9 +198,9 @@ extension _AccountAuthViews on _AccountScreenState {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Full name',
-            style: TextStyle(
+          Text(
+            tr('Full name'),
+            style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
               color: Color(0xFF171717),
@@ -214,14 +214,14 @@ extension _AccountAuthViews on _AccountScreenState {
             textCapitalization: TextCapitalization.words,
             validator: _validateName,
             decoration: _inputDecoration(
-              hint: 'Enter your full name',
+              hint: tr('Enter your full name'),
               icon: Icons.person_outline_rounded,
             ),
           ),
           const SizedBox(height: 18),
-          const Text(
-            'Mobile number',
-            style: TextStyle(
+          Text(
+            tr('Mobile number'),
+            style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
               color: Color(0xFF171717),
@@ -246,7 +246,7 @@ extension _AccountAuthViews on _AccountScreenState {
           if (!_signUpOtpSent) ...[
             const SizedBox(height: 22),
             _MainButton(
-              title: 'Create account',
+              title: tr('Create account'),
               loading: _isLoading,
               onPressed: _sendSignUpOtp,
             ),
@@ -260,9 +260,9 @@ extension _AccountAuthViews on _AccountScreenState {
           ],
           if (_signUpOtpSent) ...[
             const SizedBox(height: 20),
-            const Text(
-              'Verification code',
-              style: TextStyle(
+            Text(
+              tr('Verification code'),
+              style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF171717),
@@ -285,7 +285,7 @@ extension _AccountAuthViews on _AccountScreenState {
             ),
             const SizedBox(height: 22),
             _MainButton(
-              title: 'Verify & Create Account',
+              title: tr('Verify & Create Account'),
               loading: _isLoading,
               onPressed: _verifySignUp,
             ),
@@ -298,9 +298,9 @@ extension _AccountAuthViews on _AccountScreenState {
                     _signUpOtpController.clear();
                   });
                 },
-                child: const Text(
-                  'Change details',
-                  style: TextStyle(
+                child: Text(
+                  tr('Change details'),
+                  style: const TextStyle(
                     color: Color(0xFFEE7424),
                     fontWeight: FontWeight.w700,
                   ),

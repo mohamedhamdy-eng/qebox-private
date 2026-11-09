@@ -29,9 +29,9 @@ extension _CartSections on CartScreen {
 
                 ref.read(orderNoteProvider.notifier).clear();
               },
-              child: const Text(
-                'Clear',
-                style: TextStyle(
+              child: Text(
+                tr('Clear'),
+                style: const TextStyle(
                   color: Color(0xFFEE7424),
                   fontWeight: FontWeight.w700,
                 ),
@@ -94,9 +94,9 @@ extension _CartSections on CartScreen {
             // =============================================
             // ORDER NOTES
             // =============================================
-            const Text(
-              'Order notes',
-              style: TextStyle(
+            Text(
+              tr('Order notes'),
+              style: const TextStyle(
                 fontSize: 19,
                 fontWeight: FontWeight.w800,
                 color: Color(0xFF171717),
@@ -105,9 +105,9 @@ extension _CartSections on CartScreen {
 
             const SizedBox(height: 6),
 
-            const Text(
-              'Add any special instructions for your order.',
-              style: TextStyle(fontSize: 12, color: Color(0xFF777777)),
+            Text(
+              tr('Add any special instructions for your order.'),
+              style: const TextStyle(fontSize: 12, color: Color(0xFF777777)),
             ),
 
             const SizedBox(height: 14),
@@ -120,7 +120,7 @@ extension _CartSections on CartScreen {
                 ref.read(orderNoteProvider.notifier).updateNote(value);
               },
               decoration: InputDecoration(
-                hintText: 'Example: Please call before delivery...',
+                hintText: tr('Example: Please call before delivery...'),
                 hintStyle: const TextStyle(
                   color: Color(0xFF999999),
                   fontSize: 13,
@@ -152,9 +152,9 @@ extension _CartSections on CartScreen {
             if (recommended.isNotEmpty) ...[
               const SizedBox(height: 30),
 
-              const Text(
-                'You may also like',
-                style: TextStyle(
+              Text(
+                tr('You may also like'),
+                style: const TextStyle(
                   fontSize: 19,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF171717),
@@ -163,9 +163,9 @@ extension _CartSections on CartScreen {
 
               const SizedBox(height: 6),
 
-              const Text(
-                'Popular additions for your order',
-                style: TextStyle(fontSize: 12, color: Color(0xFF777777)),
+              Text(
+                tr('Popular additions for your order'),
+                style: const TextStyle(fontSize: 12, color: Color(0xFF777777)),
               ),
 
               const SizedBox(height: 14),
@@ -232,12 +232,17 @@ extension _CartSections on CartScreen {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Subtotal',
-                  style: TextStyle(fontSize: 15, color: Color(0xFF777777)),
+                Expanded(
+                  child: Text(
+                    tr('Subtotal'),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: Color(0xFF777777),
+                    ),
+                  ),
                 ),
                 Text(
-                  'EGP ${subtotal.toStringAsFixed(2)}',
+                  tr('EGP {0}', [subtotal.toStringAsFixed(2)]),
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
@@ -268,9 +273,12 @@ extension _CartSections on CartScreen {
                     borderRadius: BorderRadius.circular(28),
                   ),
                 ),
-                child: const Text(
-                  'Proceed to Checkout',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                child: Text(
+                  tr('Proceed to Checkout'),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ),
@@ -286,7 +294,7 @@ extension _CartSections on CartScreen {
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
           child: Align(
-            alignment: Alignment.centerLeft,
+            alignment: AlignmentDirectional.centerStart,
             child: IconButton(
               onPressed: () {
                 _goToHome(context);
@@ -301,30 +309,33 @@ extension _CartSections on CartScreen {
             ),
           ),
         ),
-        const Expanded(
+        Expanded(
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
+                const Icon(
                   Icons.shopping_cart_outlined,
                   size: 90,
                   color: Color(0xFFCCCCCC),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Text(
-                  'Your cart is empty',
-                  style: TextStyle(
+                  tr('Your cart is empty'),
+                  style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF171717),
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
-                  'Add some products and they will appear here.',
+                  tr('Add some products and they will appear here.'),
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: Color(0xFF777777)),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF777777),
+                  ),
                 ),
               ],
             ),
