@@ -12,6 +12,7 @@ const {
   getDoc,
   getDocs,
   query,
+  serverTimestamp,
   setDoc,
   updateDoc,
   where,
@@ -40,8 +41,11 @@ beforeEach(async () => {
     await setDoc(doc(db, "products/hidden"), {active: false, price: 1});
     await setDoc(doc(db, "coupons/c1"), {code: "SAVE20", active: true});
     await setDoc(doc(db, "orders/o1"), {customerId: "u1", status: "Pending"});
+    await setDoc(doc(db, "orders/o2"), {customerId: "u2", status: "Cancelled"});
+    await setDoc(doc(db, "orders/o3"), {customerId: "u3", status: "Delivered"});
     await setDoc(doc(db, "admins/staff"), {active: true});
     await setDoc(doc(db, "admins/former"), {active: false});
+    await setDoc(doc(db, "preparationAccounts/prep"), {active: true});
     await setDoc(doc(db, "customers/u1"), {name: "A", phone: "010"});
   });
 });
@@ -115,4 +119,54 @@ test("customers manage only their own addresses", async () => {
 
 test("customers cannot grant themselves staff access", async () => {
   await assertFails(setDoc(doc(user("u1"), "admins/u1"), {active: true}));
+  await assertFails(
+      setDoc(doc(user("u1"), "preparationAccounts/u1"), {active: true}),
+  );
+});
+
+test("Preparation lists open and started orders only", async () => {
+  const orders = collection(user("prep"), "orders");
+  await assertSucceeds(getDocs(query(
+      orders, where("status", "in", ["Pending", "Scheduled"]),
+  )));
+  await assertSucceeds(getDocs(query(
+      orders, where("status", "in", ["Pending", "Scheduled", "Preparing"]),
+  )));
+  await assertFails(getDocs(orders));
+  await assertFails(getDocs(query(orders, where("status", "==", "Delivered"))));
+});
+
+test("Preparation reads one order by ID to check a cancellation", async () => {
+  await assertSucceeds(getDoc(doc(user("prep"), "orders/o2")));
+  await assertSucceeds(getDoc(doc(user("prep"), "orders/o1")));
+});
+
+test("Preparation cannot write orders or read other data", async () => {
+  const db = user("prep");
+  await assertFails(updateDoc(doc(db, "orders/o1"), {status: "Preparing"}));
+  await assertFails(updateDoc(doc(db, "orders/o1"), {
+    note: "x", revision: 2, updatedAt: serverTimestamp(),
+  }));
+  await assertFails(setDoc(doc(db, "orders/new"), {status: "Pending"}));
+  await assertFails(getDoc(doc(db, "customers/u1")));
+  await assertFails(getDocs(collection(db, "customers")));
+  await assertFails(getDoc(doc(db, "coupons/c1")));
+  await assertFails(getDocs(collection(db, "couponRedemptions")));
+});
+
+test("staff cannot change an order status directly", async () => {
+  await assertFails(updateDoc(doc(user("staff"), "orders/o1"), {
+    status: "Preparing", revision: 2, updatedAt: serverTimestamp(),
+  }));
+});
+
+test("every staff edit to an order raises the revision by one", async () => {
+  const order = doc(user("staff"), "orders/o1");
+  await assertFails(updateDoc(order, {note: "x"}));
+  await assertFails(updateDoc(order, {
+    note: "x", revision: 3, updatedAt: serverTimestamp(),
+  }));
+  await assertSucceeds(updateDoc(order, {
+    note: "x", revision: 2, updatedAt: serverTimestamp(),
+  }));
 });

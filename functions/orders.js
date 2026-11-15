@@ -176,6 +176,20 @@ async function readProducts(db, tx, productIds) {
   return products;
 }
 
+// One entry per product in the bundle, with its quantity in one bundle.
+function bundleContents(bundle, products) {
+  const counts = new Map();
+  for (const productId of bundle.productIds || []) {
+    const id = String(productId);
+    counts.set(id, (counts.get(id) || 0) + 1);
+  }
+  return [...counts].map(([id, quantity]) => ({
+    product_id: id,
+    product_name: products.get(id).data.name || id,
+    quantity,
+  }));
+}
+
 function buildLines(quantities, bundles, products) {
   const lines = [];
   for (const [id, quantity] of quantities) {
@@ -187,6 +201,7 @@ function buildLines(quantities, bundles, products) {
         price: toPiastres(bundle.price),
         quantity,
         imageUrl: bundle.imageUrl || null,
+        bundleItems: bundleContents(bundle, products),
       });
       continue;
     }
@@ -325,6 +340,7 @@ async function placeOrder(db, request, {allowAnonymous = false, now} = {}) {
         price: toPounds(line.price),
         quantity: line.quantity,
         image_url: line.imageUrl,
+        ...(line.bundleItems && {bundle_items: line.bundleItems}),
       })),
       itemCount: lines.reduce((sum, line) => sum + line.quantity, 0),
       branchName: input.address.label,
@@ -343,7 +359,9 @@ async function placeOrder(db, request, {allowAnonymous = false, now} = {}) {
       stockReservations: Object.fromEntries(required),
       substitutionPreference: input.substitutionPreference,
       deliveryInstruction: input.deliveryInstruction,
+      revision: 1,
       createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     };
     tx.create(orderRef, order);
     return orderSummary(order);
@@ -405,8 +423,154 @@ async function cancelOrder(db, request, {allowAnonymous = false} = {}) {
       status: "Cancelled",
       cancellationReason: reason,
       cancelledAt: FieldValue.serverTimestamp(),
+      revision: revisionOf(order) + 1,
+      updatedAt: FieldValue.serverTimestamp(),
     });
     return {status: "Cancelled"};
+  });
+}
+
+// Orders placed before revisions existed count as revision 1.
+const revisionOf = (order) =>
+  Number.isInteger(order.revision) ? order.revision : 1;
+
+const STATUSES = new Set([
+  "Pending",
+  "Scheduled",
+  "Preparing",
+  "Driver Assigned",
+  "Out For Delivery",
+  "Delivered",
+  "Cancelled",
+]);
+// The Preparation system only reports that picking has started.
+const PREPARATION_STEPS = {
+  "Pending": "Preparing",
+  "Scheduled": "Preparing",
+};
+// Staff move an order forward one step at a time.
+const STAFF_STEPS = {
+  ...PREPARATION_STEPS,
+  "Preparing": "Driver Assigned",
+  "Driver Assigned": "Out For Delivery",
+  "Out For Delivery": "Delivered",
+};
+const REQUEST_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
+
+// details.code is the error code that the Preparation system reads.
+const statusError = (httpCode, code, message, details = {}) =>
+  new HttpsError(httpCode, message, {code, ...details});
+
+function parseStatusInput(data) {
+  const input = data || {};
+  const bad = (message) =>
+    statusError("invalid-argument", "INVALID_ARGUMENT", message);
+  if (!ORDER_ID_PATTERN.test(String(input.orderId))) {
+    throw bad("The order number is not valid.");
+  }
+  if (!STATUSES.has(input.status)) throw bad("The status is not valid.");
+  if (!Number.isInteger(input.expectedRevision) || input.expectedRevision < 0) {
+    throw bad("expectedRevision must be a whole number.");
+  }
+  if (
+    typeof input.requestId !== "string" ||
+    !REQUEST_ID_PATTERN.test(input.requestId)
+  ) {
+    throw bad("requestId is not valid.");
+  }
+  return input;
+}
+
+async function actorRole(db, uid) {
+  const [preparation, staff] = await db.getAll(
+      db.collection("preparationAccounts").doc(uid),
+      db.collection("admins").doc(uid),
+  );
+  if (preparation.get("active") === true) return "preparation";
+  if (staff.get("active") === true) return "staff";
+  return null;
+}
+
+/**
+ * Changes the status of an order for the Preparation system or for staff.
+ * It runs in a transaction on the same document as cancelOrder, so a
+ * customer cancellation and the start of preparation cannot both succeed.
+ * A repeat with the same requestId returns the first answer.
+ * @param {object} db The Firestore instance.
+ * @param {object} request The callable request.
+ * @return {Promise<object>} The new status and revision.
+ */
+async function updateOrderStatus(db, request) {
+  if (!request.auth) {
+    throw statusError("unauthenticated", "UNAUTHENTICATED", "Please sign in.");
+  }
+  const input = parseStatusInput(request.data);
+  const uid = request.auth.uid;
+  const role = await actorRole(db, uid);
+  if (!role) {
+    throw statusError(
+        "permission-denied", "PERMISSION_DENIED",
+        "This account cannot change order status.",
+    );
+  }
+  const steps = role === "preparation" ? PREPARATION_STEPS : STAFF_STEPS;
+  const orderRef = db.collection("orders").doc(input.orderId);
+  const changeRef = orderRef.collection("statusChanges").doc(input.requestId);
+
+  return db.runTransaction(async (tx) => {
+    const [snapshot, previous] = await tx.getAll(orderRef, changeRef);
+    if (!snapshot.exists) {
+      throw statusError("not-found", "NOT_FOUND", "Order not found.");
+    }
+    if (previous.exists) {
+      if (previous.get("status") !== input.status) {
+        throw statusError(
+            "invalid-argument", "INVALID_ARGUMENT",
+            "This requestId was already used for another status.",
+        );
+      }
+      return previous.get("response");
+    }
+
+    const order = snapshot.data();
+    const current = {status: order.status, revision: revisionOf(order)};
+    if (order.status === "Cancelled") {
+      throw statusError(
+          "failed-precondition", "ORDER_CANCELLED",
+          "The customer cancelled this order.", current,
+      );
+    }
+    if (input.expectedRevision !== current.revision) {
+      throw statusError(
+          "aborted", "REVISION_MISMATCH",
+          "The order changed. Read it again and retry.", current,
+      );
+    }
+    if (steps[order.status] !== input.status) {
+      throw statusError(
+          "failed-precondition", "INVALID_TRANSITION",
+          `The order cannot move from ${order.status} to ${input.status}.`,
+          current,
+      );
+    }
+
+    const response = {status: input.status, revision: current.revision + 1};
+    tx.update(orderRef, {
+      status: input.status,
+      revision: response.revision,
+      updatedAt: FieldValue.serverTimestamp(),
+      statusChangedAt: FieldValue.serverTimestamp(),
+      statusChangedBy: {uid, role},
+    });
+    tx.create(changeRef, {
+      from: order.status,
+      status: input.status,
+      revision: response.revision,
+      actor: {uid, role},
+      at: FieldValue.serverTimestamp(),
+      response,
+    });
+    return response;
   });
 }
 
@@ -438,4 +602,4 @@ async function previewCoupon(db, request, now = Date.now()) {
   };
 }
 
-module.exports = {cancelOrder, placeOrder, previewCoupon};
+module.exports = {cancelOrder, placeOrder, previewCoupon, updateOrderStatus};

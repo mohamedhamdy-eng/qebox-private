@@ -74,6 +74,8 @@ test("creates the order with server prices and reserves stock", async () => {
   assert.strictEqual(saved.customerPhone, "+201000000000");
   assert.strictEqual(saved.status, "Pending");
   assert.strictEqual(saved.items[0].price, 65);
+  assert.strictEqual(saved.revision, 1);
+  assert.ok(saved.updatedAt);
   assert.strictEqual(await stockOf("milk"), 3);
 });
 
@@ -192,6 +194,26 @@ test("a bundle uses the bundle price and reserves each product", async () => {
   assert.strictEqual(result.subtotal, 70);
   assert.strictEqual(await stockOf("milk"), 4);
   assert.strictEqual(await stockOf("bread"), 4);
+  const saved = (await db.collection("orders").doc(ID).get()).data();
+  assert.deepStrictEqual(saved.items[0].bundle_items, [
+    {product_id: "milk", product_name: "Milk", quantity: 1},
+    {product_id: "bread", product_name: "Bread", quantity: 1},
+  ]);
+});
+
+test("bundle contents count a repeated product once per copy", async () => {
+  await db.collection("bundles").doc("b1").update({
+    productIds: ["milk", "milk", "bread"],
+  });
+  await place(order({
+    items: [{productId: "bundle:b1", quantity: 2}], expectedTotal: 160,
+  }));
+  const saved = (await db.collection("orders").doc(ID).get()).data();
+  assert.deepStrictEqual(saved.items[0].bundle_items, [
+    {product_id: "milk", product_name: "Milk", quantity: 2},
+    {product_id: "bread", product_name: "Bread", quantity: 1},
+  ]);
+  assert.strictEqual(await stockOf("milk"), 1);
 });
 
 test("cancelling returns stock and coupon use once", async () => {
@@ -202,6 +224,8 @@ test("cancelling returns stock and coupon use once", async () => {
   const saved = (await db.collection("orders").doc(ID).get()).data();
   assert.strictEqual(saved.status, "Cancelled");
   assert.strictEqual(saved.cancellationReason, "Changed");
+  assert.ok(saved.cancelledAt);
+  assert.strictEqual(saved.revision, 2);
   assert.strictEqual(await stockOf("milk"), 5);
   const coupon = await db.collection("coupons").doc("c1").get();
   assert.strictEqual(coupon.get("usedCount"), 0);

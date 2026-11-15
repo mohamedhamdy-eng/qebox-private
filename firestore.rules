@@ -15,6 +15,12 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true;
     }
 
+    // The account that the Preparation server signs in with.
+    function isPreparation() {
+      return signedIn()
+        && get(/databases/$(database)/documents/preparationAccounts/$(request.auth.uid)).data.active == true;
+    }
+
     function publicRead() {
       return resource.data.active == true || isStaff();
     }
@@ -45,9 +51,18 @@ service cloud.firestore {
     }
 
     // Only the placeOrder and cancelOrder functions create or cancel orders.
+    // Status changes only through the updateOrderStatus function. Every
+    // other change raises the revision by one.
     match /orders/{id} {
-      allow read: if isStaff() || isOwner(resource.data.customerId);
-      allow update: if isStaff();
+      allow get: if isStaff() || isOwner(resource.data.customerId)
+        || isPreparation();
+      allow list: if isStaff() || isOwner(resource.data.customerId)
+        || (isPreparation()
+          && resource.data.status in ['Pending', 'Scheduled', 'Preparing']);
+      allow update: if isStaff()
+        && request.resource.data.status == resource.data.status
+        && request.resource.data.revision == resource.data.get('revision', 1) + 1
+        && request.resource.data.updatedAt == request.time;
     }
 
     match /customers/{uid} {
@@ -64,6 +79,11 @@ service cloud.firestore {
 
     // Set staff accounts from the Firebase console or the Admin SDK.
     match /admins/{uid} {
+      allow read: if isOwner(uid);
+    }
+
+    // Set the Preparation account from the Firebase console.
+    match /preparationAccounts/{uid} {
       allow read: if isOwner(uid);
     }
   }

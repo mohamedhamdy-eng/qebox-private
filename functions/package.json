@@ -7,7 +7,7 @@
   },
   "scripts": {
     "test": "node --test test/pricing.test.js test/qbot.test.js",
-    "test:emulator": "firebase emulators:exec --only firestore --project demo-qebox \"node --test --test-concurrency=1 test/orders.emulator.test.js test/rules.emulator.test.js\""
+    "test:emulator": "firebase emulators:exec --only firestore --project demo-qebox \"node --test --test-concurrency=1 test/orders.emulator.test.js test/status.emulator.test.js test/rules.emulator.test.js\""
   },
   "dependencies": {
     "firebase-admin": "^14.5.0",

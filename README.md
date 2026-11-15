@@ -29,6 +29,36 @@ firebase deploy --only functions,firestore:rules
 Do the same with `firebase use default` for production. Create the Gemini key
 in Google AI Studio. Do not commit the key.
 
+## Preparation integration
+
+The Preparation system reads orders from Firestore and calls the
+`updateOrderStatus` function when picking starts. The contract and the field
+mapping are in [docs/preparation-integration.md](docs/preparation-integration.md).
+
+To connect it to a project:
+
+1. In Firebase Authentication, turn on the Email/Password sign-in method.
+2. Add a user for the Preparation server. Create its password in a password
+   manager. Do not send the password by email or chat.
+3. In Firestore, add a `preparationAccounts/{uid}` document with
+   `active: true`, where `uid` is the new user's ID. Do not add this user to
+   `admins`. The rules let it read orders and nothing else.
+4. Deploy the functions and the rules.
+5. Give orders placed before this release a revision. Run a dry run first:
+
+   ```powershell
+   cd functions
+   node scripts/backfill-revisions.js qeboxprivate-dev
+   node scripts/backfill-revisions.js qeboxprivate-dev --write
+   ```
+
+To turn the account off, set `active` to `false`.
+
+Order status changes only through `updateOrderStatus`. The Preparation account
+can only set `Preparing`. Staff accounts move an order forward one step at a
+time, up to `Delivered`. A staff edit to any other order field must raise
+`revision` by one and set `updatedAt` to the server time.
+
 ## Languages
 
 The app supports English and Arabic. It follows the device language, and the

@@ -25,6 +25,12 @@ exports.cancelOrder = onCall((request) =>
 
 exports.previewCoupon = onCall((request) => orders.previewCoupon(db, request));
 
+// The Preparation system calls this when picking starts. Staff use it for
+// the later delivery statuses.
+exports.updateOrderStatus = onCall((request) =>
+  orders.updateOrderStatus(db, request),
+);
+
 exports.askQBot = onCall({secrets: [geminiApiKey]}, (request) =>
   qbot.askQBot(db, request, {apiKey: geminiApiKey.value()}),
 );
