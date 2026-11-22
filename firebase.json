@@ -9,6 +9,15 @@
       "ignore": ["node_modules", "test", "scripts"]
     }
   ],
+  "emulators": {
+    "auth": {"host": "0.0.0.0", "port": 9098},
+    "firestore": {"host": "0.0.0.0", "port": 8086},
+    "functions": {"host": "0.0.0.0", "port": 5002},
+    "hub": {"port": 4410},
+    "logging": {"port": 4510},
+    "ui": {"enabled": true, "port": 4010},
+    "singleProjectMode": true
+  },
   "hosting": {
     "public": "build/web",
     "ignore": [

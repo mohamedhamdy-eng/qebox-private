@@ -54,6 +54,53 @@ To connect it to a project:
 
 To turn the account off, set `active` to `false`.
 
+### Test with the Preparation app on one computer, for free
+
+The emulators use their own ports (Auth 9098, Firestore 8086, Functions 5002,
+UI 4010), so they run beside the Preparation emulators. They need Java.
+
+```powershell
+firebase emulators:start --only auth,firestore,functions --project demo-qebox --export-on-exit .emulator-data
+```
+
+Add `--import .emulator-data` after the first run to keep the test data. In a
+second terminal, add the test data and orders:
+
+```powershell
+cd functions
+node scripts/local.js seed
+node scripts/local.js place normal
+node scripts/local.js place bundle
+node scripts/local.js list
+```
+
+`seed` creates the Preparation account `preparation@qebox.test` with the
+password `qebox-local`, which works only on the emulator. During the joint
+tests, `cancel <orderId>` cancels as the customer, `edit <orderId>` changes an
+item as staff, and `prepare <orderId>` sets `Preparing` as staff.
+
+The Preparation server connects to:
+
+| What | Local address |
+| --- | --- |
+| Project ID | `demo-qebox` |
+| Auth | `127.0.0.1:9098` |
+| Firestore | `127.0.0.1:8086` |
+| `updateOrderStatus` | `http://127.0.0.1:5002/demo-qebox/us-central1/updateOrderStatus` |
+
+To use the Qebox app on a phone with the emulators, connect the phone to the
+same Wi-Fi as the computer and run the app with the computer's address
+(`ipconfig` shows it):
+
+```powershell
+flutter run --dart-define=EMULATOR_HOST=192.168.1.14
+```
+
+Debug builds then send login, data and orders to the emulators. Log in with any
+phone number. No text message is sent; the code is in the emulator UI under
+Authentication. Windows Firewall must allow ports 9098, 8086, and 5002 from
+the local network. Release builds ignore `EMULATOR_HOST`.
+
 Order status changes only through `updateOrderStatus`. The Preparation account
 can only set `Preparing`. Staff accounts move an order forward one step at a
 time, up to `Delivered`. A staff edit to any other order field must raise

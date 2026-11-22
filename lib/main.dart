@@ -41,6 +41,22 @@ Future<void> main() async {
   final firebaseApp = await _initializeFirebase();
   final firebaseAuth = FirebaseAuth.instanceFor(app: firebaseApp);
   final firestore = FirebaseFirestore.instanceFor(app: firebaseApp);
+  final functions = FirebaseFunctions.instanceFor(app: firebaseApp);
+  if (AppFirebaseOptions.usesEmulators) {
+    const host = AppFirebaseOptions.emulatorHost;
+    await firebaseAuth.useAuthEmulator(
+      host,
+      AppFirebaseOptions.authEmulatorPort,
+    );
+    firestore.useFirestoreEmulator(
+      host,
+      AppFirebaseOptions.firestoreEmulatorPort,
+    );
+    functions.useFunctionsEmulator(
+      host,
+      AppFirebaseOptions.functionsEmulatorPort,
+    );
+  }
   if (AppFirebaseOptions.environment == AppEnvironment.development &&
       firebaseAuth.currentUser == null) {
     try {
@@ -52,7 +68,6 @@ Future<void> main() async {
     }
   }
   final preferences = await SharedPreferences.getInstance();
-  final functions = FirebaseFunctions.instanceFor(app: firebaseApp);
 
   runApp(
     ProviderScope(
@@ -144,9 +159,14 @@ Future<void> main() async {
 
 Future<FirebaseApp> _initializeFirebase() async {
   final options = AppFirebaseOptions.currentPlatform;
-  const developmentAppName = 'qebox-development';
+  // The emulators get their own app name, so a login saved from the dev
+  // project is not sent to them.
+  final developmentAppName = AppFirebaseOptions.usesEmulators
+      ? 'qebox-emulators'
+      : 'qebox-development';
 
-  if (AppFirebaseOptions.environment == AppEnvironment.development) {
+  if (AppFirebaseOptions.environment == AppEnvironment.development ||
+      AppFirebaseOptions.usesEmulators) {
     for (final app in Firebase.apps) {
       if (app.name == developmentAppName) return app;
     }
