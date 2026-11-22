@@ -17,20 +17,22 @@ void main() {
     expect(viewModel.state.messages.last.text, contains('My Orders'));
   });
 
-  test('Q Bot executes add-to-cart commands against the real catalog',
-      () async {
-    final added = <String>[];
-    final viewModel = ChatViewModel(
-      const LocalQBotRepository(),
-      addProduct: (product) => added.add(product.id),
-    );
+  test(
+    'Q Bot executes add-to-cart commands against the real catalog',
+    () async {
+      final added = <String>[];
+      final viewModel = ChatViewModel(
+        const LocalQBotRepository(),
+        addProduct: (product) => added.add(product.id),
+      );
 
-    await viewModel.send('Add 2 fresh milk to my cart');
+      await viewModel.send('Add 2 fresh milk to my cart');
 
-    expect(added, [
-      ProductCatalog.popularProducts.first.id,
-      ProductCatalog.popularProducts.first.id,
-    ]);
-    expect(viewModel.state.messages.last.text, contains('2 × Fresh Milk'));
-  });
+      expect(added, [
+        ProductCatalog.popularProducts.first.id,
+        ProductCatalog.popularProducts.first.id,
+      ]);
+      expect(viewModel.state.messages.last.text, contains('2 × Fresh Milk'));
+    },
+  );
 }

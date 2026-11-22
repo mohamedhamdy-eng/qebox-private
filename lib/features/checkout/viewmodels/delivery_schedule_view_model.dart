@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/l10n/app_language.dart';
 
 class DeliveryTimeSlot {
   final String id;
@@ -16,7 +17,7 @@ class DeliveryTimeSlot {
   }
 
   static String _formatHour(int hour) {
-    final period = hour >= 12 ? 'PM' : 'AM';
+    final period = hour >= 12 ? tr('PM') : tr('AM');
 
     var displayHour = hour % 12;
 
@@ -32,19 +33,14 @@ class DeliveryScheduleState {
   final DateTime? selectedDate;
   final DeliveryTimeSlot? selectedTimeSlot;
 
-  const DeliveryScheduleState({
-    this.selectedDate,
-    this.selectedTimeSlot,
-  });
+  const DeliveryScheduleState({this.selectedDate, this.selectedTimeSlot});
 
   bool get isComplete {
-    return selectedDate != null &&
-        selectedTimeSlot != null;
+    return selectedDate != null && selectedTimeSlot != null;
   }
 
   DateTime? get deliveryStartDateTime {
-    if (selectedDate == null ||
-        selectedTimeSlot == null) {
+    if (selectedDate == null || selectedTimeSlot == null) {
       return null;
     }
 
@@ -57,8 +53,7 @@ class DeliveryScheduleState {
   }
 
   DateTime? get deliveryEndDateTime {
-    if (selectedDate == null ||
-        selectedTimeSlot == null) {
+    if (selectedDate == null || selectedTimeSlot == null) {
       return null;
     }
 
@@ -77,41 +72,26 @@ class DeliveryScheduleState {
     bool clearTimeSlot = false,
   }) {
     return DeliveryScheduleState(
-      selectedDate: clearDate
-          ? null
-          : selectedDate ?? this.selectedDate,
+      selectedDate: clearDate ? null : selectedDate ?? this.selectedDate,
       selectedTimeSlot: clearTimeSlot
           ? null
-          : selectedTimeSlot ??
-              this.selectedTimeSlot,
+          : selectedTimeSlot ?? this.selectedTimeSlot,
     );
   }
 }
 
-class DeliveryScheduleViewModel
-    extends StateNotifier<DeliveryScheduleState> {
-  DeliveryScheduleViewModel()
-      : super(
-          const DeliveryScheduleState(),
-        );
+class DeliveryScheduleViewModel extends StateNotifier<DeliveryScheduleState> {
+  DeliveryScheduleViewModel() : super(const DeliveryScheduleState());
 
   void selectDate(DateTime date) {
     state = state.copyWith(
-      selectedDate: DateTime(
-        date.year,
-        date.month,
-        date.day,
-      ),
+      selectedDate: DateTime(date.year, date.month, date.day),
       clearTimeSlot: true,
     );
   }
 
-  void selectTimeSlot(
-    DeliveryTimeSlot timeSlot,
-  ) {
-    state = state.copyWith(
-      selectedTimeSlot: timeSlot,
-    );
+  void selectTimeSlot(DeliveryTimeSlot timeSlot) {
+    state = state.copyWith(selectedTimeSlot: timeSlot);
   }
 
   void clearSchedule() {
@@ -120,10 +100,8 @@ class DeliveryScheduleViewModel
 }
 
 final deliveryScheduleProvider =
-    StateNotifierProvider<
-        DeliveryScheduleViewModel,
-        DeliveryScheduleState>(
-  (ref) {
-    return DeliveryScheduleViewModel();
-  },
-);
+    StateNotifierProvider<DeliveryScheduleViewModel, DeliveryScheduleState>((
+      ref,
+    ) {
+      return DeliveryScheduleViewModel();
+    });

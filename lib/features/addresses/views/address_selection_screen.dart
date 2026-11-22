@@ -3,17 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../viewmodels/address_view_model.dart';
 import 'add_address_screen.dart';
+import '../../../core/l10n/app_language.dart';
 
 class AddressSelectionScreen extends ConsumerWidget {
-  const AddressSelectionScreen({
-    super.key,
-  });
+  const AddressSelectionScreen({super.key});
 
   @override
-  Widget build(
-    BuildContext context,
-    WidgetRef ref,
-  ) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final addressState = ref.watch(addressProvider);
 
     final selectedAddress = addressState.selectedAddress;
@@ -24,9 +20,9 @@ class AddressSelectionScreen extends ConsumerWidget {
         backgroundColor: const Color(0xFFF9F7F3),
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          'Delivery Address',
-          style: TextStyle(
+        title: Text(
+          tr('Delivery Address'),
+          style: const TextStyle(
             color: Color(0xFF171717),
             fontSize: 20,
             fontWeight: FontWeight.w800,
@@ -41,7 +37,6 @@ class AddressSelectionScreen extends ConsumerWidget {
               // ==========================================
               // ADD NEW ADDRESS
               // ==========================================
-
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -55,29 +50,15 @@ class AddressSelectionScreen extends ConsumerWidget {
                       ),
                     );
                   },
-                  icon: const Icon(
-                    Icons.add_rounded,
-                  ),
-                  label: const Text(
-                    'Add new address',
-                  ),
+                  icon: const Icon(Icons.add_rounded),
+                  label: Text(tr('Add new address')),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(
-                      0xFFEE7424,
-                    ),
-                    side: const BorderSide(
-                      color: Color(
-                        0xFFEE7424,
-                      ),
-                    ),
+                    foregroundColor: const Color(0xFFEE7424),
+                    side: const BorderSide(color: Color(0xFFEE7424)),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        28,
-                      ),
+                      borderRadius: BorderRadius.circular(28),
                     ),
-                    textStyle: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                    ),
+                    textStyle: const TextStyle(fontWeight: FontWeight.w800),
                   ),
                 ),
               ),
@@ -87,31 +68,24 @@ class AddressSelectionScreen extends ConsumerWidget {
               // ==========================================
               // ADDRESS LIST
               // ==========================================
-
               Expanded(
                 child: addressState.addresses.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.location_off_outlined,
                               size: 70,
-                              color: Color(
-                                0xFFCCCCCC,
-                              ),
+                              color: Color(0xFFCCCCCC),
                             ),
-                            SizedBox(
-                              height: 14,
-                            ),
+                            const SizedBox(height: 14),
                             Text(
-                              'No addresses added yet.',
-                              style: TextStyle(
+                              tr('No addresses added yet.'),
+                              style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w700,
-                                color: Color(
-                                  0xFF777777,
-                                ),
+                                color: Color(0xFF777777),
                               ),
                             ),
                           ],
@@ -119,53 +93,31 @@ class AddressSelectionScreen extends ConsumerWidget {
                       )
                     : ListView.separated(
                         itemCount: addressState.addresses.length,
-                        separatorBuilder: (
-                          context,
-                          index,
-                        ) {
-                          return const SizedBox(
-                            height: 14,
-                          );
+                        separatorBuilder: (context, index) {
+                          return const SizedBox(height: 14);
                         },
-                        itemBuilder: (
-                          context,
-                          index,
-                        ) {
+                        itemBuilder: (context, index) {
                           final address = addressState.addresses[index];
 
                           final isSelected = selectedAddress?.id == address.id;
 
                           return InkWell(
-                            borderRadius: BorderRadius.circular(
-                              22,
-                            ),
+                            borderRadius: BorderRadius.circular(22),
                             onTap: () {
                               ref
-                                  .read(
-                                    addressProvider.notifier,
-                                  )
-                                  .selectAddress(
-                                    address.id,
-                                  );
+                                  .read(addressProvider.notifier)
+                                  .selectAddress(address.id);
 
-                              Navigator.pop(
-                                context,
-                              );
+                              Navigator.pop(context);
                             },
                             child: Container(
-                              padding: const EdgeInsets.all(
-                                16,
-                              ),
+                              padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(
-                                  22,
-                                ),
+                                borderRadius: BorderRadius.circular(22),
                                 border: Border.all(
                                   color: isSelected
-                                      ? const Color(
-                                          0xFFEE7424,
-                                        )
+                                      ? const Color(0xFFEE7424)
                                       : Colors.transparent,
                                   width: 1.5,
                                 ),
@@ -176,36 +128,24 @@ class AddressSelectionScreen extends ConsumerWidget {
                                   // ==================================
                                   // ICON
                                   // ==================================
-
                                   Container(
                                     width: 48,
                                     height: 48,
                                     decoration: BoxDecoration(
-                                      color: const Color(
-                                        0xFFFFE6D5,
-                                      ),
-                                      borderRadius: BorderRadius.circular(
-                                        15,
-                                      ),
+                                      color: const Color(0xFFFFE6D5),
+                                      borderRadius: BorderRadius.circular(15),
                                     ),
                                     child: Icon(
-                                      _getAddressIcon(
-                                        address.label,
-                                      ),
-                                      color: const Color(
-                                        0xFFEE7424,
-                                      ),
+                                      _getAddressIcon(address.label),
+                                      color: const Color(0xFFEE7424),
                                     ),
                                   ),
 
-                                  const SizedBox(
-                                    width: 14,
-                                  ),
+                                  const SizedBox(width: 14),
 
                                   // ==================================
                                   // ADDRESS INFO
                                   // ==================================
-
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
@@ -215,41 +155,33 @@ class AddressSelectionScreen extends ConsumerWidget {
                                           children: [
                                             Flexible(
                                               child: Text(
-                                                address.label,
+                                                tr(address.label),
                                                 style: const TextStyle(
                                                   fontSize: 15,
                                                   fontWeight: FontWeight.w800,
-                                                  color: Color(
-                                                    0xFF171717,
-                                                  ),
+                                                  color: Color(0xFF171717),
                                                 ),
                                               ),
                                             ),
                                             if (address.isDefault) ...[
-                                              const SizedBox(
-                                                width: 7,
-                                              ),
+                                              const SizedBox(width: 7),
                                               Container(
                                                 padding:
                                                     const EdgeInsets.symmetric(
-                                                  horizontal: 7,
-                                                  vertical: 3,
-                                                ),
+                                                      horizontal: 7,
+                                                      vertical: 3,
+                                                    ),
                                                 decoration: BoxDecoration(
                                                   color: const Color(
                                                     0xFFFFE6D5,
                                                   ),
                                                   borderRadius:
-                                                      BorderRadius.circular(
-                                                    10,
-                                                  ),
+                                                      BorderRadius.circular(10),
                                                 ),
-                                                child: const Text(
-                                                  'DEFAULT',
-                                                  style: TextStyle(
-                                                    color: Color(
-                                                      0xFFEE7424,
-                                                    ),
+                                                child: Text(
+                                                  tr('DEFAULT'),
+                                                  style: const TextStyle(
+                                                    color: Color(0xFFEE7424),
                                                     fontSize: 8,
                                                     fontWeight: FontWeight.w800,
                                                   ),
@@ -258,9 +190,7 @@ class AddressSelectionScreen extends ConsumerWidget {
                                             ],
                                           ],
                                         ),
-                                        const SizedBox(
-                                          height: 5,
-                                        ),
+                                        const SizedBox(height: 5),
                                         Text(
                                           address.addressLine,
                                           maxLines: 2,
@@ -268,15 +198,11 @@ class AddressSelectionScreen extends ConsumerWidget {
                                           style: const TextStyle(
                                             fontSize: 12,
                                             height: 1.3,
-                                            color: Color(
-                                              0xFF777777,
-                                            ),
+                                            color: Color(0xFF777777),
                                           ),
                                         ),
                                         if (address.building != null) ...[
-                                          const SizedBox(
-                                            height: 5,
-                                          ),
+                                          const SizedBox(height: 5),
                                           Text(
                                             _buildAddressDetails(
                                               building: address.building,
@@ -287,9 +213,7 @@ class AddressSelectionScreen extends ConsumerWidget {
                                             overflow: TextOverflow.ellipsis,
                                             style: const TextStyle(
                                               fontSize: 11,
-                                              color: Color(
-                                                0xFF999999,
-                                              ),
+                                              color: Color(0xFF999999),
                                             ),
                                           ),
                                         ],
@@ -297,25 +221,18 @@ class AddressSelectionScreen extends ConsumerWidget {
                                     ),
                                   ),
 
-                                  const SizedBox(
-                                    width: 8,
-                                  ),
+                                  const SizedBox(width: 8),
 
                                   // ==================================
                                   // SELECTED ICON
                                   // ==================================
-
                                   Icon(
                                     isSelected
                                         ? Icons.check_circle_rounded
                                         : Icons.radio_button_unchecked_rounded,
                                     color: isSelected
-                                        ? const Color(
-                                            0xFFEE7424,
-                                          )
-                                        : const Color(
-                                            0xFFCCCCCC,
-                                          ),
+                                        ? const Color(0xFFEE7424)
+                                        : const Color(0xFFCCCCCC),
                                   ),
                                 ],
                               ),
@@ -331,9 +248,7 @@ class AddressSelectionScreen extends ConsumerWidget {
     );
   }
 
-  IconData _getAddressIcon(
-    String label,
-  ) {
+  IconData _getAddressIcon(String label) {
     switch (label.toLowerCase()) {
       case 'work':
         return Icons.work_outline_rounded;
@@ -355,21 +270,15 @@ class AddressSelectionScreen extends ConsumerWidget {
     final parts = <String>[];
 
     if (building != null && building.isNotEmpty) {
-      parts.add(
-        'Building $building',
-      );
+      parts.add(tr('Building {0}', [building]));
     }
 
     if (floor != null && floor.isNotEmpty) {
-      parts.add(
-        'Floor $floor',
-      );
+      parts.add(tr('Floor {0}', [floor]));
     }
 
     if (apartment != null && apartment.isNotEmpty) {
-      parts.add(
-        'Apartment $apartment',
-      );
+      parts.add(tr('Apartment {0}', [apartment]));
     }
 
     return parts.join(' • ');

@@ -3,10 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../account/viewmodels/customer_view_model.dart';
 import '../../orders/viewmodels/orders_view_model.dart';
+import '../../../core/l10n/app_language.dart';
 
 class RewardOption {
   const RewardOption(
-      this.id, this.name, this.description, this.points, this.icon);
+    this.id,
+    this.name,
+    this.description,
+    this.points,
+    this.icon,
+  );
   final String id;
   final String name;
   final String description;
@@ -26,30 +32,41 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
 
   static const rewards = [
     RewardOption(
-        'delivery',
-        'Free grocery delivery',
-        'Your next standard delivery is on us.',
-        300,
-        Icons.local_shipping_outlined),
-    RewardOption('voucher25', 'EGP 25 off your basket',
-        'Use it on an order of EGP 150 or more.', 500, Icons.sell_outlined),
-    RewardOption('fresh', 'Fresh fruit & veg box',
-        'A seasonal selection for your kitchen.', 1500, Icons.eco_outlined),
+      'delivery',
+      'Free grocery delivery',
+      'Your next standard delivery is on us.',
+      300,
+      Icons.local_shipping_outlined,
+    ),
     RewardOption(
-        'pantry',
-        'Everyday pantry trio',
-        'Milk, snacks and cooking essentials.',
-        2500,
-        Icons.inventory_2_outlined),
+      'voucher25',
+      'EGP 25 off your basket',
+      'Use it on an order of EGP 150 or more.',
+      500,
+      Icons.sell_outlined,
+    ),
+    RewardOption(
+      'fresh',
+      'Fresh fruit & veg box',
+      'A seasonal selection for your kitchen.',
+      1500,
+      Icons.eco_outlined,
+    ),
+    RewardOption(
+      'pantry',
+      'Everyday pantry trio',
+      'Milk, snacks and cooking essentials.',
+      2500,
+      Icons.inventory_2_outlined,
+    ),
   ];
 
   @override
   Widget build(BuildContext context) {
     final customer = ref.watch(customerProvider).customer;
-    final earned = ref.watch(ordersProvider).fold<double>(
-          0,
-          (total, order) => total + order.total,
-        );
+    final earned = ref
+        .watch(ordersProvider)
+        .fold<double>(0, (total, order) => total + order.total);
     final spent = rewards
         .where((reward) => _redeemed.contains(reward.id))
         .fold<int>(0, (total, reward) => total + reward.points);
@@ -60,15 +77,21 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFBF2),
         surfaceTintColor: Colors.transparent,
-        title: const Text('Q Rewards',
-            style: TextStyle(fontWeight: FontWeight.w900)),
+        title: Text(
+          tr('Q Rewards'),
+          style: const TextStyle(fontWeight: FontWeight.w900),
+        ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 18),
+            padding: const EdgeInsetsDirectional.only(end: 18),
             child: Center(
-              child: Text('$points pts',
-                  style: const TextStyle(
-                      color: Color(0xFFEE7424), fontWeight: FontWeight.w900)),
+              child: Text(
+                tr('{0} pts', [points]),
+                style: const TextStyle(
+                  color: Color(0xFFEE7424),
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
             ),
           ),
         ],
@@ -87,41 +110,55 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
               borderRadius: BorderRadius.circular(26),
               boxShadow: const [
                 BoxShadow(
-                    color: Color(0x28000000),
-                    blurRadius: 18,
-                    offset: Offset(0, 8)),
+                  color: Color(0x28000000),
+                  blurRadius: 18,
+                  offset: Offset(0, 8),
+                ),
               ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
-                    CircleAvatar(
+                    const CircleAvatar(
                       backgroundColor: Color(0xFFEE7424),
-                      child: Text('Q',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w900)),
-                    ),
-                    SizedBox(width: 10),
-                    Text('QEBOX REWARDS',
+                      child: Text(
+                        'Q',
                         style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.w900)),
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      tr('QEBOX REWARDS'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 24),
                 Center(
-                    child: _MemberCode(value: customer?.id ?? 'QEBOX-GUEST')),
+                  child: _MemberCode(value: customer?.id ?? 'QEBOX-GUEST'),
+                ),
                 const SizedBox(height: 18),
-                const Text('Scan. Shop. Get rewarded.',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 21,
-                        fontWeight: FontWeight.w900)),
+                Text(
+                  tr('Scan. Shop. Get rewarded.'),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 21,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
                 const SizedBox(height: 5),
-                const Text('Show your Q at checkout to collect points.',
-                    style: TextStyle(color: Color(0xFFCCCCCC))),
+                Text(
+                  tr('Show your Q at checkout to collect points.'),
+                  style: const TextStyle(color: Color(0xFFCCCCCC)),
+                ),
               ],
             ),
           ),
@@ -134,18 +171,27 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.stars_rounded,
-                    color: Color(0xFFEE7424), size: 32),
+                const Icon(
+                  Icons.stars_rounded,
+                  color: Color(0xFFEE7424),
+                  size: 32,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('$points available points',
-                          style: const TextStyle(fontWeight: FontWeight.w900)),
-                      const Text('One point is earned for each EGP spent.',
-                          style: TextStyle(
-                              fontSize: 12, color: Color(0xFF777777))),
+                      Text(
+                        tr('{0} available points', [points]),
+                        style: const TextStyle(fontWeight: FontWeight.w900),
+                      ),
+                      Text(
+                        tr('One point is earned for each EGP spent.'),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF777777),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -153,11 +199,15 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
             ),
           ),
           const SizedBox(height: 28),
-          const Text('Pick your next reward',
-              style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900)),
+          Text(
+            tr('Pick your next reward'),
+            style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w900),
+          ),
           const SizedBox(height: 5),
-          const Text('Turn your points into everyday savings.',
-              style: TextStyle(color: Color(0xFF777777))),
+          Text(
+            tr('Turn your points into everyday savings.'),
+            style: const TextStyle(color: Color(0xFF777777)),
+          ),
           const SizedBox(height: 15),
           ...rewards.map((reward) {
             final claimed = _redeemed.contains(reward.id);
@@ -187,18 +237,26 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(reward.name,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w900)),
+                          Text(
+                            tr(reward.name),
+                            style: const TextStyle(fontWeight: FontWeight.w900),
+                          ),
                           const SizedBox(height: 3),
-                          Text(reward.description,
-                              style: const TextStyle(
-                                  fontSize: 12, color: Color(0xFF777777))),
+                          Text(
+                            tr(reward.description),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF777777),
+                            ),
+                          ),
                           const SizedBox(height: 6),
-                          Text('${reward.points} pts',
-                              style: const TextStyle(
-                                  color: Color(0xFFEE7424),
-                                  fontWeight: FontWeight.w800)),
+                          Text(
+                            tr('{0} pts', [reward.points]),
+                            style: const TextStyle(
+                              color: Color(0xFFEE7424),
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -206,11 +264,13 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
                       onPressed: locked || claimed
                           ? null
                           : () => setState(() => _redeemed.add(reward.id)),
-                      child: Text(claimed
-                          ? 'Claimed'
-                          : locked
-                              ? 'Locked'
-                              : 'Redeem'),
+                      child: Text(
+                        claimed
+                            ? tr('Claimed')
+                            : locked
+                            ? tr('Locked')
+                            : tr('Redeem'),
+                      ),
                     ),
                   ],
                 ),
@@ -234,7 +294,9 @@ class _MemberCode extends StatelessWidget {
       width: 136,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(14)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+      ),
       child: Column(
         children: [
           SizedBox(
@@ -242,18 +304,22 @@ class _MemberCode extends StatelessWidget {
             child: GridView.builder(
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 9),
+                crossAxisCount: 9,
+              ),
               itemCount: 81,
               itemBuilder: (_, index) => Container(
                 margin: const EdgeInsets.all(1),
-                color:
-                    ((index * 17 + seed) % 5) < 2 ? Colors.black : Colors.white,
+                color: ((index * 17 + seed) % 5) < 2
+                    ? Colors.black
+                    : Colors.white,
               ),
             ),
           ),
           const SizedBox(height: 5),
-          Text(value.length > 14 ? value.substring(0, 14) : value,
-              style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700)),
+          Text(
+            value.length > 14 ? value.substring(0, 14) : value,
+            style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700),
+          ),
         ],
       ),
     );

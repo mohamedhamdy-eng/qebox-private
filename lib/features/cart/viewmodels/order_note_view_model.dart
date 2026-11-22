@@ -8,7 +8,6 @@ class OrderNoteViewModel extends StateNotifier<String> {
   void clear() => state = '';
 }
 
-final orderNoteProvider =
-    StateNotifierProvider<OrderNoteViewModel, String>(
+final orderNoteProvider = StateNotifierProvider<OrderNoteViewModel, String>(
   (ref) => OrderNoteViewModel(),
 );

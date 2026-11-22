@@ -8,11 +8,7 @@ enum OrderStatus {
   cancelled,
 }
 
-enum OrderPaymentMethod {
-  cash,
-  card,
-  wallet,
-}
+enum OrderPaymentMethod { cash, card, wallet }
 
 class OrderItem {
   final String productId;
@@ -158,10 +154,7 @@ class CustomerOrder {
     required this.createdAt,
   });
 
-  CustomerOrder copyWith({
-    OrderStatus? status,
-    String? cancellationReason,
-  }) {
+  CustomerOrder copyWith({OrderStatus? status, String? cancellationReason}) {
     return CustomerOrder(
       id: id,
 

@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/qebox_theme.dart';
 import '../models/product.dart';
+import '../../../core/l10n/app_language.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -34,7 +36,6 @@ class ProductCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 155,
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -62,34 +63,36 @@ class ProductCard extends StatelessWidget {
                   ),
                   child:
                       product.imageUrl != null && product.imageUrl!.isNotEmpty
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(18),
-                              child: Image.network(
-                                product.imageUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (
-                                  context,
-                                  error,
-                                  stackTrace,
-                                ) {
-                                  return const Icon(
-                                    Icons.shopping_bag_outlined,
-                                    size: 48,
-                                    color: Color(0xFFEE7424),
-                                  );
-                                },
-                              ),
-                            )
-                          : const Icon(
-                              Icons.shopping_bag_outlined,
-                              size: 48,
-                              color: Color(0xFFEE7424),
-                            ),
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(18),
+                          child: product.imageUrl!.startsWith('data:image/')
+                              ? Image.memory(
+                                  base64Decode(
+                                    product.imageUrl!.split(',').last,
+                                  ),
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.network(
+                                  product.imageUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(
+                                        Icons.shopping_bag_outlined,
+                                        size: 48,
+                                        color: Color(0xFFEE7424),
+                                      ),
+                                ),
+                        )
+                      : const Icon(
+                          Icons.shopping_bag_outlined,
+                          size: 48,
+                          color: Color(0xFFEE7424),
+                        ),
                 ),
                 if (product.isNew)
-                  Positioned(
+                  PositionedDirectional(
                     top: 8,
-                    left: 8,
+                    start: 8,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -99,9 +102,9 @@ class ProductCard extends StatelessWidget {
                         color: const Color(0xFFEE7424),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text(
-                        'NEW',
-                        style: TextStyle(
+                      child: Text(
+                        tr('NEW'),
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 9,
                           fontWeight: FontWeight.w800,
@@ -109,9 +112,9 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                Positioned(
+                PositionedDirectional(
                   top: 8,
-                  right: 8,
+                  end: 8,
                   child: InkWell(
                     onTap: onFavoriteTap,
                     borderRadius: BorderRadius.circular(20),
@@ -138,7 +141,7 @@ class ProductCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              product.name,
+              product.displayName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -150,22 +153,30 @@ class ProductCard extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                Text(
-                  'EGP ${product.price.toStringAsFixed(0)}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFFEE7424),
+                Flexible(
+                  child: Text(
+                    tr('EGP {0}', [product.price.toStringAsFixed(0)]),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFFEE7424),
+                    ),
                   ),
                 ),
                 if (product.hasDiscount) ...[
                   const SizedBox(width: 6),
-                  Text(
-                    'EGP ${product.oldPrice!.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                      fontSize: 10,
-                      color: Color(0xFF999999),
-                      decoration: TextDecoration.lineThrough,
+                  Flexible(
+                    child: Text(
+                      tr('EGP {0}', [product.oldPrice!.toStringAsFixed(0)]),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Color(0xFF999999),
+                        decoration: TextDecoration.lineThrough,
+                      ),
                     ),
                   ),
                 ],
@@ -199,12 +210,9 @@ class ProductCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
         ),
-        child: const Text(
-          'Add to cart',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-          ),
+        child: Text(
+          tr('Add to cart'),
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
         ),
       ),
     );
@@ -227,11 +235,7 @@ class ProductCard extends StatelessWidget {
             child: const SizedBox(
               width: 40,
               height: 36,
-              child: Icon(
-                Icons.remove_rounded,
-                color: Colors.white,
-                size: 19,
-              ),
+              child: Icon(Icons.remove_rounded, color: Colors.white, size: 19),
             ),
           ),
           Text(
@@ -248,11 +252,7 @@ class ProductCard extends StatelessWidget {
             child: const SizedBox(
               width: 40,
               height: 36,
-              child: Icon(
-                Icons.add_rounded,
-                color: Colors.white,
-                size: 19,
-              ),
+              child: Icon(Icons.add_rounded, color: Colors.white, size: 19),
             ),
           ),
         ],
@@ -269,9 +269,9 @@ class ProductCard extends StatelessWidget {
         color: const Color(0xFFCCCCCC),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: const Text(
-        'Out of stock',
-        style: TextStyle(
+      child: Text(
+        tr('Out of stock'),
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 12,
           fontWeight: FontWeight.w700,
